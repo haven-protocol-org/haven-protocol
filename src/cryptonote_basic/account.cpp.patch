@@ -1,0 +1,67 @@
+--- monero/src/cryptonote_basic/account.cpp	2019-06-20 21:03:18.730816602 +0100
++++ haven/src/cryptonote_basic/account.cpp	2019-05-30 17:58:17.121592273 +0100
+@@ -64,19 +64,19 @@
+     MCDEBUG("device", "account_keys::set_device device type: "<<typeid(hwdev).name());
+   }
+   //-----------------------------------------------------------------
+-  static void derive_key(const crypto::chacha_key &base_key, crypto::chacha_key &key)
++  static void derive_key(const crypto::chacha8_key &base_key, crypto::chacha8_key &key)
+   {
+     static_assert(sizeof(base_key) == sizeof(crypto::hash), "chacha key and hash should be the same size");
+     epee::mlocked<tools::scrubbed_arr<char, sizeof(base_key)+1>> data;
+     memcpy(data.data(), &base_key, sizeof(base_key));
+     data[sizeof(base_key)] = KEYS_ENCRYPTION_SALT;
+-    crypto::generate_chacha_key(data.data(), sizeof(data), key, 1);
++    crypto::generate_chacha8_key(data.data(), sizeof(data), key);
+   }
+   //-----------------------------------------------------------------
+-  static epee::wipeable_string get_key_stream(const crypto::chacha_key &base_key, const crypto::chacha_iv &iv, size_t bytes)
++  static epee::wipeable_string get_key_stream(const crypto::chacha8_key &base_key, const crypto::chacha8_iv &iv, size_t bytes)
+   {
+     // derive a new key
+-    crypto::chacha_key key;
++    crypto::chacha8_key key;
+     derive_key(base_key, key);
+ 
+     // chacha
+@@ -86,7 +86,7 @@
+     return buffer1;
+   }
+   //-----------------------------------------------------------------
+-  void account_keys::xor_with_key_stream(const crypto::chacha_key &key)
++  void account_keys::xor_with_key_stream(const crypto::chacha8_key &key)
+   {
+     // encrypt a large enough byte stream with chacha20
+     epee::wipeable_string key_stream = get_key_stream(key, m_encryption_iv, sizeof(crypto::secret_key) * (2 + m_multisig_keys.size()));
+@@ -102,18 +102,18 @@
+     }
+   }
+   //-----------------------------------------------------------------
+-  void account_keys::encrypt(const crypto::chacha_key &key)
++  void account_keys::encrypt(const crypto::chacha8_key &key)
+   {
+-    m_encryption_iv = crypto::rand<crypto::chacha_iv>();
++    m_encryption_iv = crypto::rand<crypto::chacha8_iv>();
+     xor_with_key_stream(key);
+   }
+   //-----------------------------------------------------------------
+-  void account_keys::decrypt(const crypto::chacha_key &key)
++  void account_keys::decrypt(const crypto::chacha8_key &key)
+   {
+     xor_with_key_stream(key);
+   }
+   //-----------------------------------------------------------------
+-  void account_keys::encrypt_viewkey(const crypto::chacha_key &key)
++  void account_keys::encrypt_viewkey(const crypto::chacha8_key &key)
+   {
+     // encrypt a large enough byte stream with chacha20
+     epee::wipeable_string key_stream = get_key_stream(key, m_encryption_iv, sizeof(crypto::secret_key) * 2);
+@@ -123,7 +123,7 @@
+       m_view_secret_key.data[i] ^= *ptr++;
+   }
+   //-----------------------------------------------------------------
+-  void account_keys::decrypt_viewkey(const crypto::chacha_key &key)
++  void account_keys::decrypt_viewkey(const crypto::chacha8_key &key)
+   {
+     encrypt_viewkey(key);
+   }

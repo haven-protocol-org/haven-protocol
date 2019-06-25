@@ -1,0 +1,11 @@
+--- monero/src/daemon/command_line_args.h	2019-06-20 21:03:18.738816536 +0100
++++ haven/src/daemon/command_line_args.h	2019-05-30 17:58:17.125592233 +0100
+@@ -35,7 +35,7 @@
+ 
+ namespace daemon_args
+ {
+-  std::string const WINDOWS_SERVICE_NAME = "Monero Daemon";
++  std::string const WINDOWS_SERVICE_NAME = "Haven Daemon";
+ 
+   const command_line::arg_descriptor<std::string, false, true, 2> arg_config_file = {
+     "config-file"

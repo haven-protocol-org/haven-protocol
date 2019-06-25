@@ -1,0 +1,44 @@
+--- monero/src/cryptonote_core/blockchain.h	2019-06-20 21:03:18.734816570 +0100
++++ haven/src/cryptonote_core/blockchain.h	2019-05-30 17:58:17.125592233 +0100
+@@ -574,8 +570,8 @@
+      * @brief get dynamic per kB or byte fee for a given block weight
+      *
+      * The dynamic fee is based on the block weight in a past window, and
+-     * the current block reward. It is expressed by kB before v8, and
+-     * per byte from v8.
++     * the current block reward. It is expressed by kB before v5, and
++     * per byte from v5.
+      *
+      * @param block_reward the current block reward
+      * @param median_block_weight the median block weight in the past window
+@@ -589,8 +585,8 @@
+      * @brief get dynamic per kB or byte fee estimate for the next few blocks
+      *
+      * The dynamic fee is based on the block weight in a past window, and
+-     * the current block reward. It is expressed by kB before v8, and
+-     * per byte from v8.
++     * the current block reward. It is expressed by kB before v5, and
++     * per byte from v5.
+      * This function calculates an estimate for a dynamic fee which will be
+      * valid for the next grace_blocks
+      *
+@@ -955,9 +944,7 @@
+      * @param blocks the blocks to be hashed
+      * @param map return-by-reference the hashes for each block
+      */
+-    void block_longhash_worker(uint64_t height, const epee::span<const block> &blocks,
+-        std::unordered_map<crypto::hash, crypto::hash> &map) const;
+-
++    void block_longhash_worker(cn_pow_hash_v3& hash_ctx, const epee::span<const block> &blocks, std::unordered_map<crypto::hash, crypto::hash> &map);
+     /**
+      * @brief returns a set of known alternate chains
+      *
+@@ -1080,6 +1061,8 @@
+     // some invalid blocks
+     blocks_ext_by_hash m_invalid_blocks;     // crypto::hash -> block_extended_info
+ 
++    cn_pow_hash_v3 m_pow_ctx;
++    std::vector<cn_pow_hash_v3> m_hash_ctxes_multi;
+ 
+     checkpoints m_checkpoints;
+     bool m_enforce_dns_checkpoints;

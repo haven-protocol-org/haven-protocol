@@ -1,0 +1,11 @@
+--- monero/src/version.cpp.in	2019-06-20 21:03:18.790816107 +0100
++++ haven/src/version.cpp.in	2019-06-17 17:10:44.689734856 +0100
+@@ -1,6 +1,6 @@
+ #define DEF_MONERO_VERSION_TAG "@VERSIONTAG@"
+-#define DEF_MONERO_VERSION "0.14.1.0"
+-#define DEF_MONERO_RELEASE_NAME "Boron Butterfly"
++#define DEF_MONERO_VERSION "0.14.0"
++#define DEF_MONERO_RELEASE_NAME "Adrenaline"
+ #define DEF_MONERO_VERSION_FULL DEF_MONERO_VERSION "-" DEF_MONERO_VERSION_TAG
+ 
+ #include "version.h"

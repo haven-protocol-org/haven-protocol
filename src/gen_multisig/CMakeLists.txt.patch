@@ -1,0 +1,9 @@
+--- monero/src/gen_multisig/CMakeLists.txt	2019-06-20 21:03:18.754816404 +0100
++++ haven/src/gen_multisig/CMakeLists.txt	2019-05-30 17:58:17.133592153 +0100
+@@ -50,5 +50,5 @@
+   version)
+ set_property(TARGET gen_multisig
+   PROPERTY
+-    OUTPUT_NAME "monero-gen-trusted-multisig")
++    OUTPUT_NAME "haven-gen-trusted-multisig")
+ install(TARGETS gen_multisig DESTINATION bin)

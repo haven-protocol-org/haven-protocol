@@ -1,0 +1,450 @@
+--- monero/src/cryptonote_core/blockchain.cpp	2019-06-20 21:03:18.734816570 +0100
++++ haven/src/cryptonote_core/blockchain.cpp	2019-06-17 17:10:44.685734900 +0100
+@@ -90,39 +88,13 @@
+   time_t time;
+ } mainnet_hard_forks[] = {
+   // version 1 from the start of the blockchain
+-  { 1, 1, 0, 1341378000 },
+-
+-  // version 2 starts from block 1009827, which is on or around the 20th of March, 2016. Fork time finalised on 2015-09-20. No fork voting occurs for the v2 fork.
+-  { 2, 1009827, 0, 1442763710 },
+-
+-  // version 3 starts from block 1141317, which is on or around the 24th of September, 2016. Fork time finalised on 2016-03-21.
+-  { 3, 1141317, 0, 1458558528 },
+-  
+-  // version 4 starts from block 1220516, which is on or around the 5th of January, 2017. Fork time finalised on 2016-09-18.
+-  { 4, 1220516, 0, 1483574400 },
+-  
+-  // version 5 starts from block 1288616, which is on or around the 15th of April, 2017. Fork time finalised on 2017-03-14.
+-  { 5, 1288616, 0, 1489520158 },  
+-
+-  // version 6 starts from block 1400000, which is on or around the 16th of September, 2017. Fork time finalised on 2017-08-18.
+-  { 6, 1400000, 0, 1503046577 },
+-
+-  // version 7 starts from block 1546000, which is on or around the 6th of April, 2018. Fork time finalised on 2018-03-17.
+-  { 7, 1546000, 0, 1521303150 },
+-
+-  // version 8 starts from block 1685555, which is on or around the 18th of October, 2018. Fork time finalised on 2018-09-02.
+-  { 8, 1685555, 0, 1535889547 },
+-
+-  // version 9 starts from block 1686275, which is on or around the 19th of October, 2018. Fork time finalised on 2018-09-02.
+-  { 9, 1686275, 0, 1535889548 },
+-
+-  // version 10 starts from block 1788000, which is on or around the 9th of March, 2019. Fork time finalised on 2019-02-10.
+-  { 10, 1788000, 0, 1549792439 },
+-
+-  // version 11 starts from block 1788720, which is on or around the 10th of March, 2019. Fork time finalised on 2019-02-15.
+-  { 11, 1788720, 0, 1550225678 },
++  { 1, 1, 0, 1517398427 },
++  { 2, 38500, 0, 1522818000 },  // 4th April 2018
++  { 3, 89200, 0, 1528942500 },  // 14th June 2018
++  { 4, 290587, 0, 1553112000 },  // 20th March 2019 ~20:00 GMT
++  { 5, 356338, 0, 1561060800 }  // 20th June 2019 - 20:00 GMT
+ };
+-static const uint64_t mainnet_hard_fork_version_1_till = 1009826;
++static const uint64_t mainnet_hard_fork_version_1_till = 38499;
+ 
+ static const struct {
+   uint8_t version;
+@@ -131,24 +103,13 @@
+   time_t time;
+ } testnet_hard_forks[] = {
+   // version 1 from the start of the blockchain
+-  { 1, 1, 0, 1341378000 },
+-
+-  // version 2 starts from block 624634, which is on or around the 23rd of November, 2015. Fork time finalised on 2015-11-20. No fork voting occurs for the v2 fork.
+-  { 2, 624634, 0, 1445355000 },
+-
+-  // versions 3-5 were passed in rapid succession from September 18th, 2016
+-  { 3, 800500, 0, 1472415034 },
+-  { 4, 801219, 0, 1472415035 },
+-  { 5, 802660, 0, 1472415036 + 86400*180 }, // add 5 months on testnet to shut the update warning up since there's a large gap to v6
+-
+-  { 6, 971400, 0, 1501709789 },
+-  { 7, 1057027, 0, 1512211236 },
+-  { 8, 1057058, 0, 1533211200 },
+-  { 9, 1057778, 0, 1533297600 },
+-  { 10, 1154318, 0, 1550153694 },
+-  { 11, 1155038, 0, 1550225678 },
++  { 1, 1, 0, 1517398420 },
++  { 2, 25, 0, 1522713600 },
++  { 3, 50, 0, 1528489596 },
++  { 4, 75, 0, 1552960800 },
++  { 5, 100, 0, 1552980800 }
+ };
+-static const uint64_t testnet_hard_fork_version_1_till = 624633;
++static const uint64_t testnet_hard_fork_version_1_till = 24;
+ 
+ static const struct {
+   uint8_t version;
+@@ -157,19 +118,7 @@
+   time_t time;
+ } stagenet_hard_forks[] = {
+   // version 1 from the start of the blockchain
+-  { 1, 1, 0, 1341378000 },
+-
+-  // versions 2-7 in rapid succession from March 13th, 2018
+-  { 2, 32000, 0, 1521000000 },
+-  { 3, 33000, 0, 1521120000 },
+-  { 4, 34000, 0, 1521240000 },
+-  { 5, 35000, 0, 1521360000 },
+-  { 6, 36000, 0, 1521480000 },
+-  { 7, 37000, 0, 1521600000 },
+-  { 8, 176456, 0, 1537821770 },
+-  { 9, 177176, 0, 1537821771 },
+-  { 10, 269000, 0, 1550153694 },
+-  { 11, 269720, 0, 1550225678 },
++  { 1, 1, 0, 1517398420 }
+ };
+ 
+ //------------------------------------------------------------------
+@@ -452,9 +389,9 @@
+   uint64_t top_block_timestamp = m_db->get_top_block_timestamp();
+   uint64_t timestamp_diff = time(NULL) - top_block_timestamp;
+ 
+-  // genesis block has no timestamp, could probably change it to have timestamp of 1397818133...
++  // genesis block has no timestamp, could probably change it to have timestamp of 1341378000...
+   if(!top_block_timestamp)
+-    timestamp_diff = time(NULL) - 1397818133;
++    timestamp_diff = time(NULL) - 1341378000;
+ 
+   // create general purpose async service queue
+ 
+@@ -911,20 +833,30 @@
+   uint64_t height;
+   top_hash = get_tail_id(height); // get it again now that we have the lock
+   ++height; // top block height to blockchain height
++
++  uint8_t version = get_current_hard_fork_version();
++  size_t difficulty_blocks_count;
++  if (version == 1) {
++    difficulty_blocks_count = DIFFICULTY_BLOCKS_COUNT;
++  } else {
++    difficulty_blocks_count = DIFFICULTY_BLOCKS_COUNT_V2;
++  }
++
++  top_hash = get_tail_id(); // get it again now that we have the lock
+   // ND: Speedup
+   // 1. Keep a list of the last 735 (or less) blocks that is used to compute difficulty,
+   //    then when the next block difficulty is queried, push the latest height data and
+   //    pop the oldest one from the list. This only requires 1x read per height instead
+   //    of doing 735 (DIFFICULTY_BLOCKS_COUNT).
+-  if (m_timestamps_and_difficulties_height != 0 && ((height - m_timestamps_and_difficulties_height) == 1) && m_timestamps.size() >= DIFFICULTY_BLOCKS_COUNT)
++  if (m_timestamps_and_difficulties_height != 0 && ((height - m_timestamps_and_difficulties_height) == 1) && m_timestamps.size() >= difficulty_blocks_count)
+   {
+     uint64_t index = height - 1;
+     m_timestamps.push_back(m_db->get_block_timestamp(index));
+     m_difficulties.push_back(m_db->get_block_cumulative_difficulty(index));
+ 
+-    while (m_timestamps.size() > DIFFICULTY_BLOCKS_COUNT)
++    while (m_timestamps.size() > difficulty_blocks_count)
+       m_timestamps.erase(m_timestamps.begin());
+-    while (m_difficulties.size() > DIFFICULTY_BLOCKS_COUNT)
++    while (m_difficulties.size() > difficulty_blocks_count)
+       m_difficulties.erase(m_difficulties.begin());
+ 
+     m_timestamps_and_difficulties_height = height;
+@@ -933,7 +866,7 @@
+   }
+   else
+   {
+-    uint64_t offset = height - std::min <uint64_t> (height, static_cast<uint64_t>(DIFFICULTY_BLOCKS_COUNT));
++    uint64_t offset = height - std::min <uint64_t> (height, static_cast<uint64_t>(difficulty_blocks_count));
+     if (offset == 0)
+       ++offset;
+ 
+@@ -955,7 +888,13 @@
+     m_difficulties = difficulties;
+   }
+   size_t target = get_difficulty_target();
+-  difficulty_type diff = next_difficulty(timestamps, difficulties, target);
++
++  difficulty_type diff;
++  if (version == 1) {
++    diff = next_difficulty(timestamps, difficulties, target);
++  } else {
++    diff = next_difficulty_v2(timestamps, difficulties, target);
++  }
+ 
+   CRITICAL_REGION_LOCAL1(m_difficulty_lock);
+   m_difficulty_for_next_block_top_hash = top_hash;
+@@ -1131,15 +1069,23 @@
+   std::vector<uint64_t> timestamps;
+   std::vector<difficulty_type> cumulative_difficulties;
+ 
++  uint8_t version = get_current_hard_fork_version();
++  size_t difficulty_blocks_count;
++  if (version == 1) {
++    difficulty_blocks_count = DIFFICULTY_BLOCKS_COUNT;
++  } else {
++    difficulty_blocks_count = DIFFICULTY_BLOCKS_COUNT_V2;
++  }
++
+   // if the alt chain isn't long enough to calculate the difficulty target
+   // based on its blocks alone, need to get more blocks from the main chain
+-  if(alt_chain.size()< DIFFICULTY_BLOCKS_COUNT)
++  if(alt_chain.size()< difficulty_blocks_count)
+   {
+     CRITICAL_REGION_LOCAL(m_blockchain_lock);
+ 
+     // Figure out start and stop offsets for main chain blocks
+     size_t main_chain_stop_offset = alt_chain.size() ? alt_chain.front()->second.height : bei.height;
+-    size_t main_chain_count = DIFFICULTY_BLOCKS_COUNT - std::min(static_cast<size_t>(DIFFICULTY_BLOCKS_COUNT), alt_chain.size());
++    size_t main_chain_count = difficulty_blocks_count - std::min(static_cast<size_t>(difficulty_blocks_count), alt_chain.size());
+     main_chain_count = std::min(main_chain_count, main_chain_stop_offset);
+     size_t main_chain_start_offset = main_chain_stop_offset - main_chain_count;
+ 
+@@ -1154,7 +1100,7 @@
+     }
+ 
+     // make sure we haven't accidentally grabbed too many blocks...maybe don't need this check?
+-    CHECK_AND_ASSERT_MES((alt_chain.size() + timestamps.size()) <= DIFFICULTY_BLOCKS_COUNT, false, "Internal error, alt_chain.size()[" << alt_chain.size() << "] + vtimestampsec.size()[" << timestamps.size() << "] NOT <= DIFFICULTY_WINDOW[]" << DIFFICULTY_BLOCKS_COUNT);
++    CHECK_AND_ASSERT_MES((alt_chain.size() + timestamps.size()) <= difficulty_blocks_count, false, "Internal error, alt_chain.size()[" << alt_chain.size() << "] + vtimestampsec.size()[" << timestamps.size() << "] NOT <= DIFFICULTY_WINDOW[]" << DIFFICULTY_BLOCKS_COUNT);
+ 
+     for (auto it : alt_chain)
+     {
+@@ -1166,8 +1112,8 @@
+   // and timestamps from it alone
+   else
+   {
+-    timestamps.resize(static_cast<size_t>(DIFFICULTY_BLOCKS_COUNT));
+-    cumulative_difficulties.resize(static_cast<size_t>(DIFFICULTY_BLOCKS_COUNT));
++    timestamps.resize(static_cast<size_t>(difficulty_blocks_count));
++    cumulative_difficulties.resize(static_cast<size_t>(difficulty_blocks_count));
+     size_t count = 0;
+     size_t max_i = timestamps.size()-1;
+     // get difficulties and timestamps from most recent blocks in alt chain
+@@ -1176,7 +1122,7 @@
+       timestamps[max_i - count] = it->second.bl.timestamp;
+       cumulative_difficulties[max_i - count] = it->second.cumulative_difficulty;
+       count++;
+-      if(count >= DIFFICULTY_BLOCKS_COUNT)
++      if(count >= difficulty_blocks_count)
+         break;
+     }
+   }
+@@ -1185,7 +1131,11 @@
+   size_t target = get_ideal_hard_fork_version(bei.height) < 2 ? DIFFICULTY_TARGET_V1 : DIFFICULTY_TARGET_V2;
+ 
+   // calculate the difficulty target for the block and return it
+-  return next_difficulty(timestamps, cumulative_difficulties, target);
++  if (version == 1) {
++    return next_difficulty(timestamps, cumulative_difficulties, target);
++  } else {
++    return next_difficulty_v2(timestamps, cumulative_difficulties, target);
++  }
+ }
+ //------------------------------------------------------------------
+ // This function does a sanity check on basic things that all miner
+@@ -1245,6 +1179,42 @@
+     MERROR_VER("block weight " << cumulative_block_weight << " is bigger than allowed for this blockchain");
+     return false;
+   }
++
++  if (version >= 3) {
++    if (already_generated_coins != 0)
++    {
++      uint64_t governance_reward = get_governance_reward(m_db->height(), base_reward);
++
++      if (b.miner_tx.vout.back().amount != governance_reward)
++      {
++        MERROR("Governance reward amount incorrect.  Should be: " << print_money(governance_reward) << ", is: " << print_money(b.miner_tx.vout.back().amount));
++        return false;
++      }
++
++      std::string governance_wallet_address_str;
++
++      if (version >= 4) {
++        if (m_nettype == TESTNET) {
++          governance_wallet_address_str = ::config::testnet::GOVERNANCE_WALLET_ADDRESS_MULTI;
++	} else {
++          governance_wallet_address_str = ::config::GOVERNANCE_WALLET_ADDRESS_MULTI;
++	}
++      } else {
++        if (m_nettype == TESTNET) {
++          governance_wallet_address_str = ::config::testnet::GOVERNANCE_WALLET_ADDRESS;
++        } else {
++          governance_wallet_address_str = ::config::GOVERNANCE_WALLET_ADDRESS;
++        }
++      }
++
++      if (!validate_governance_reward_key(m_db->height(), governance_wallet_address_str, b.miner_tx.vout.size() - 1, boost::get<txout_to_key>(b.miner_tx.vout.back().target).key, m_nettype == TESTNET))
++      {
++        MERROR("Governance reward public key incorrect.");
++        return false;
++      }
++    }
++  }
++
+   if(base_reward + fee < money_in_use)
+   {
+     MERROR_VER("coinbase transaction spend too much money (" << print_money(money_in_use) << "). Block reward is " << print_money(base_reward + fee) << "(" << print_money(base_reward) << "+" << print_money(fee) << ")");
+@@ -1742,7 +1616,7 @@
+     difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);
+     CHECK_AND_ASSERT_MES(current_diff, false, "!!!!!!! DIFFICULTY OVERHEAD !!!!!!!");
+     crypto::hash proof_of_work = null_hash;
+-    get_block_longhash(bei.bl, proof_of_work, bei.height);
++    get_block_longhash(bei.bl, m_pow_ctx, proof_of_work);
+     if(!check_hash(proof_of_work, current_diff))
+     {
+       MERROR_VER("Block with id: " << id << std::endl << " for alternative chain, does not have enough proof of work: " << proof_of_work << std::endl << " expected difficulty: " << current_diff);
+@@ -2016,14 +1893,14 @@
+ //------------------------------------------------------------------
+ bool Blockchain::get_output_distribution(uint64_t amount, uint64_t from_height, uint64_t to_height, uint64_t &start_height, std::vector<uint64_t> &distribution, uint64_t &base) const
+ {
+-  // rct outputs don't exist before v4
++  // rct outputs don't exist before v5
+   if (amount == 0)
+   {
+     switch (m_nettype)
+     {
+-      case STAGENET: start_height = stagenet_hard_forks[3].height; break;
+-      case TESTNET: start_height = testnet_hard_forks[3].height; break;
+-      case MAINNET: start_height = mainnet_hard_forks[3].height; break;
++      case STAGENET: start_height = stagenet_hard_forks[4].height; break;
++      case TESTNET: start_height = testnet_hard_forks[4].height; break;
++      case MAINNET: start_height = mainnet_hard_forks[4].height; break;
+       case FAKECHAIN: start_height = 0; break;
+       default: return false;
+     }
+@@ -2638,8 +2512,8 @@
+     }
+   }
+ 
+-  // from v4, forbid invalid pubkeys
+-  if (hf_version >= 4) {
++  // from v5, forbid invalid pubkeys
++  if (hf_version >= 5) {
+     for (const auto &o: tx.vout) {
+       if (o.target.type() == typeid(txout_to_key)) {
+         const txout_to_key& out_to_key = boost::get<txout_to_key>(o.target);
+@@ -2651,34 +2525,34 @@
+     }
+   }
+ 
+-  // from v8, allow bulletproofs
+-  if (hf_version < 8) {
++  // from v5, allow bulletproofs
++  if (hf_version < 5) {
+     if (tx.version >= 2) {
+       const bool bulletproof = rct::is_rct_bulletproof(tx.rct_signatures.type);
+       if (bulletproof || !tx.rct_signatures.p.bulletproofs.empty())
+       {
+-        MERROR_VER("Bulletproofs are not allowed before v8");
++        MERROR_VER("Bulletproofs are not allowed before v5");
+         tvc.m_invalid_output = true;
+         return false;
+       }
+     }
+   }
+ 
+-  // from v9, forbid borromean range proofs
+-  if (hf_version > 8) {
++  // from v5, forbid borromean range proofs
++  if (hf_version > 5) {
+     if (tx.version >= 2) {
+       const bool borromean = rct::is_rct_borromean(tx.rct_signatures.type);
+       if (borromean)
+       {
+-        MERROR_VER("Borromean range proofs are not allowed after v8");
++        MERROR_VER("Borromean range proofs are not allowed after v5");
+         tvc.m_invalid_output = true;
+         return false;
+       }
+     }
+   }
+ 
+-  // from v10, allow bulletproofs v2
+-  if (hf_version < HF_VERSION_SMALLER_BP) {
++  // from v5, allow bulletproofs v2
++  if (hf_version < 5) {
+     if (tx.version >= 2) {
+       if (tx.rct_signatures.type == rct::RCTTypeBulletproof2)
+       {
+@@ -2689,7 +2563,7 @@
+     }
+   }
+ 
+-  // from v11, allow only bulletproofs v2
++  // from v5, allow only bulletproofs v2
+   if (hf_version > HF_VERSION_SMALLER_BP) {
+     if (tx.version >= 2) {
+       if (tx.rct_signatures.type == rct::RCTTypeBulletproof)
+@@ -2809,7 +2683,7 @@
+   {
+     size_t n_unmixable = 0, n_mixable = 0;
+     size_t mixin = std::numeric_limits<size_t>::max();
+-    const size_t min_mixin = hf_version >= HF_VERSION_MIN_MIXIN_10 ? 10 : hf_version >= HF_VERSION_MIN_MIXIN_6 ? 6 : hf_version >= HF_VERSION_MIN_MIXIN_4 ? 4 : 2;
++    const size_t min_mixin = hf_version >= HF_2_MIN_MIXIN_10 ? 10 : 4;
+     for (const auto& txin : tx.vin)
+     {
+       // non txin_to_key inputs will be rejected below
+@@ -3162,16 +3036,16 @@
+       return false;
+     }
+ 
+-    // for bulletproofs, check they're only multi-output after v8
++    // for bulletproofs, check they're only multi-output after v5
+     if (rct::is_rct_bulletproof(rv.type))
+     {
+-      if (hf_version < 8)
++      if (hf_version < 5)
+       {
+         for (const rct::Bulletproof &proof: rv.p.bulletproofs)
+         {
+           if (proof.V.size() > 1)
+           {
+-            MERROR_VER("Multi output bulletproofs are invalid before v8");
++            MERROR_VER("Multi output bulletproofs are invalid before v5");
+             return false;
+           }
+         }
+@@ -3643,12 +3507,12 @@
+       proof_of_work = it->second;
+     }
+     else
+-      proof_of_work = get_block_longhash(bl, blockchain_height);
++      get_block_longhash(bl, m_pow_ctx, proof_of_work);
+ 
+     // validate proof_of_work versus difficulty target
+     if(!check_hash(proof_of_work, current_diffic))
+     {
+-      MERROR_VER("Block with id: " << id << std::endl << "does not have enough proof of work: " << proof_of_work << " at height " << blockchain_height << ", unexpected difficulty: " << current_diffic);
++      MERROR_VER("Block with id: " << id << std::endl << "does not have enough proof of work: " << proof_of_work << std::endl << "unexpected difficulty: " << current_diffic);
+       bvc.m_verifivation_failed = true;
+       goto leave;
+     }
+@@ -4136,21 +3910,20 @@
+ }
+ 
+ //------------------------------------------------------------------
+-void Blockchain::block_longhash_worker(uint64_t height, const epee::span<const block> &blocks, std::unordered_map<crypto::hash, crypto::hash> &map) const
++void Blockchain::block_longhash_worker(cn_pow_hash_v3& hash_ctx, const epee::span<const block> &blocks, std::unordered_map<crypto::hash, crypto::hash> &map)
+ {
+   TIME_MEASURE_START(t);
+-  slow_hash_allocate_state();
+ 
+   for (const auto & block : blocks)
+   {
+     if (m_cancel)
+        break;
+     crypto::hash id = get_block_hash(block);
+-    crypto::hash pow = get_block_longhash(block, height++);
++    crypto::hash pow;
++    get_block_longhash(block, hash_ctx, pow);
+     map.emplace(id, pow);
+   }
+ 
+-  slow_hash_free_state();
+   TIME_MEASURE_FINISH(t);
+ }
+ 
+@@ -4845,7 +4618,7 @@
+ }
+ 
+ #if defined(PER_BLOCK_CHECKPOINT)
+-static const char expected_block_hashes_hash[] = "cfca50ea0c87718ac92a14654c60d7ee8f6453e2765b329b40d10da4ed85a4f2";
++static const char expected_block_hashes_hash[] = "e12bc486d6f80148b770198a169dee92ef89498b7b3f40530e0551657825ae1d";
+ void Blockchain::load_compiled_in_block_hashes(const GetCheckpointsCallback& get_checkpoints)
+ {
+   if (get_checkpoints == nullptr || !m_fast_sync)

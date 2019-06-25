@@ -1,0 +1,11 @@
+--- monero/src/wallet/CMakeLists.txt	2019-06-20 21:03:18.790816107 +0100
++++ haven/src/wallet/CMakeLists.txt	2019-06-05 12:45:14.757728974 +0100
+@@ -107,7 +106,7 @@
+     ${EXTRA_LIBRARIES})
+ set_property(TARGET wallet_rpc_server
+   PROPERTY
+-    OUTPUT_NAME "monero-wallet-rpc")
++    OUTPUT_NAME "haven-wallet-rpc")
+ install(TARGETS wallet_rpc_server DESTINATION bin)
+ 
+ 

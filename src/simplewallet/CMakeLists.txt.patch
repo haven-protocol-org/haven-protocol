@@ -1,0 +1,10 @@
+--- monero/src/simplewallet/CMakeLists.txt	2019-06-20 21:03:18.778816206 +0100
++++ haven/src/simplewallet/CMakeLists.txt	2019-06-17 17:10:29.913895310 +0100
+@@ -61,5 +61,6 @@
+     ${EXTRA_LIBRARIES})
+ set_property(TARGET simplewallet
+   PROPERTY
+-    OUTPUT_NAME "monero-wallet-cli")
++    OUTPUT_NAME "haven-wallet-cli")
+ install(TARGETS simplewallet DESTINATION bin)
++add_definitions(-D__STDC_FORMAT_MACROS)

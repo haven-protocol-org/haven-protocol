@@ -1,0 +1,25 @@
+--- monero/src/wallet/wallet_rpc_server.cpp	2019-06-20 21:03:18.814815909 +0100
++++ haven/src/wallet/wallet_rpc_server.cpp	2019-06-17 17:10:44.705734682 +0100
+@@ -3373,6 +3230,9 @@
+       }
+     }
+ 
++    // NEAC - added to set language in newly-recreated wallet file
++    wal->set_seed_language(req.language);
++      
+     try
+     {
+       if (!req.spendkey.empty())
+@@ -3437,6 +3297,12 @@
+     }
+ 
+     // early check for mandatory fields
++    if (req.filename.empty())
++    {
++      er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
++      er.message = "field 'filename' is mandatory. Please provide a filename to save the restored wallet to.";
++      return false;
++    }
+     if (req.seed.empty())
+     {
+       er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;

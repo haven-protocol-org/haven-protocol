@@ -1,0 +1,11 @@
+--- monero/src/common/compat/glibc_compat.cpp	2019-06-20 21:03:18.710816768 +0100
++++ haven/src/common/compat/glibc_compat.cpp	2019-05-30 17:58:17.105592432 +0100
+@@ -82,7 +82,7 @@
+ #undef glob
+ extern "C" int glob_old(const char * pattern, int flags, int (*errfunc) (const char *epath, int eerrno), glob_t *pglob);
+ #ifdef __i386__
+-__asm__(".symver glob_old,glob@GLIBC_2.0");
++__asm__(".symver glob_old,glob@GLIBC_2.1");
+ #elif defined(__amd64__)
+ __asm__(".symver glob_old,glob@GLIBC_2.2.5");
+ #elif defined(__arm__)

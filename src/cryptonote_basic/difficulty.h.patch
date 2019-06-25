@@ -1,0 +1,16 @@
+--- monero/src/cryptonote_basic/difficulty.h	2019-06-20 21:03:18.730816602 +0100
++++ haven/src/cryptonote_basic/difficulty.h	2019-05-30 17:58:17.121592273 +0100
+@@ -53,12 +51,7 @@
+      *
+      * @return true if valid, else false
+      */
+-    bool check_hash_64(const crypto::hash &hash, uint64_t difficulty);
+-    uint64_t next_difficulty_64(std::vector<std::uint64_t> timestamps, std::vector<uint64_t> cumulative_difficulties, size_t target_seconds);
+-
+-    bool check_hash_128(const crypto::hash &hash, difficulty_type difficulty);
+     bool check_hash(const crypto::hash &hash, difficulty_type difficulty);
+     difficulty_type next_difficulty(std::vector<std::uint64_t> timestamps, std::vector<difficulty_type> cumulative_difficulties, size_t target_seconds);
+-
+-    std::string hex(difficulty_type v);
++    difficulty_type next_difficulty_v2(std::vector<std::uint64_t> timestamps, std::vector<difficulty_type> cumulative_difficulties, size_t target_seconds);
+ }

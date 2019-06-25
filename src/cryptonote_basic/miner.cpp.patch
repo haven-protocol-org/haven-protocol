@@ -1,0 +1,34 @@
+--- monero/src/cryptonote_basic/miner.cpp	2019-06-20 21:03:18.730816602 +0100
++++ haven/src/cryptonote_basic/miner.cpp	2019-06-17 17:10:44.681734943 +0100
+@@ -467,10 +387,11 @@
+   //-----------------------------------------------------------------------------------------------------
+   bool miner::find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height)
+   {
++    cn_pow_hash_v3 hash_ctx;
+     for(; bl.nonce != std::numeric_limits<uint32_t>::max(); bl.nonce++)
+     {
+       crypto::hash h;
+-      get_block_longhash(bl, h, height);
++      get_block_longhash(bl, hash_ctx, h);
+ 
+       if(check_hash(h, diffic))
+       {
+@@ -523,8 +445,7 @@
+     difficulty_type local_diff = 0;
+     uint32_t local_template_ver = 0;
+     block b;
+-    slow_hash_allocate_state();
+-    ++m_threads_active;
++    cn_pow_hash_v3 hash_ctx;
+     while(!m_stop)
+     {
+       if(m_pausers_count)//anti split workaround
+@@ -566,7 +487,7 @@
+ 
+       b.nonce = nonce;
+       crypto::hash h;
+-      get_block_longhash(b, h, height);
++      get_block_longhash(b, hash_ctx, h);
+ 
+       if(check_hash(h, local_diff))
+       {

@@ -1,0 +1,9 @@
+--- monero/src/daemon/CMakeLists.txt	2019-06-20 21:03:18.738816536 +0100
++++ haven/src/daemon/CMakeLists.txt	2019-05-30 17:58:17.125592233 +0100
+@@ -94,5 +94,5 @@
+     ${Blocks})
+ set_property(TARGET daemon
+   PROPERTY
+-    OUTPUT_NAME "monerod")
++    OUTPUT_NAME "havend")
+ install(TARGETS daemon DESTINATION bin)

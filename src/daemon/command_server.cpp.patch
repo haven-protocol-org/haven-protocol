@@ -1,0 +1,11 @@
+--- monero/src/daemon/command_server.cpp	2019-06-20 21:03:18.738816536 +0100
++++ haven/src/daemon/command_server.cpp	2019-05-30 17:58:17.125592233 +0100
+@@ -363,7 +352,7 @@
+ std::string t_command_server::get_commands_str()
+ {
+   std::stringstream ss;
+-  ss << "Monero '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")" << std::endl;
++  ss << "Haven '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")" << std::endl;
+   ss << "Commands: " << std::endl;
+   std::string usage = m_command_lookup.get_usage();
+   boost::replace_all(usage, "\n", "\n  ");

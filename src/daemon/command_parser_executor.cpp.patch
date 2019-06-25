@@ -1,0 +1,11 @@
+--- monero/src/daemon/command_parser_executor.cpp	2019-06-20 21:03:18.738816536 +0100
++++ haven/src/daemon/command_parser_executor.cpp	2019-05-30 17:58:17.125592233 +0100
+@@ -758,7 +738,7 @@
+ 
+ bool t_command_parser_executor::version(const std::vector<std::string>& args)
+ {
+-  std::cout << "Monero '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")" << std::endl;
++  std::cout << "Haven '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")" << std::endl;
+   return true;
+ }
+ 

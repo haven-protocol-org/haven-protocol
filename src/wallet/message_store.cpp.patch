@@ -1,0 +1,67 @@
+--- monero/src/wallet/message_store.cpp	2019-06-20 21:03:18.794816074 +0100
++++ haven/src/wallet/message_store.cpp	2019-06-05 12:45:14.769728847 +0100
+@@ -704,13 +704,13 @@
+   ar << *this;
+   std::string buf = oss.str();
+ 
+-  crypto::chacha_key key;
+-  crypto::generate_chacha_key(&state.view_secret_key, sizeof(crypto::secret_key), key, 1);
++  crypto::chacha8_key key;
++  crypto::generate_chacha8_key(&state.view_secret_key, sizeof(crypto::secret_key), key);
+ 
+   file_data write_file_data = boost::value_initialized<file_data>();
+   write_file_data.magic_string = "MMS";
+   write_file_data.file_version = 0;
+-  write_file_data.iv = crypto::rand<crypto::chacha_iv>();
++  write_file_data.iv = crypto::rand<crypto::chacha8_iv>();
+   std::string encrypted_data;
+   encrypted_data.resize(buf.size());
+   crypto::chacha20(buf.data(), buf.size(), key, write_file_data.iv, &encrypted_data[0]);
+@@ -754,8 +754,8 @@
+     THROW_WALLET_EXCEPTION_IF(true, tools::error::file_read_error, filename);
+   }
+ 
+-  crypto::chacha_key key;
+-  crypto::generate_chacha_key(&state.view_secret_key, sizeof(crypto::secret_key), key, 1);
++  crypto::chacha8_key key;
++  crypto::generate_chacha8_key(&state.view_secret_key, sizeof(crypto::secret_key), key);
+   std::string decrypted_data;
+   decrypted_data.resize(read_file_data.encrypted_data.size());
+   crypto::chacha20(read_file_data.encrypted_data.data(), read_file_data.encrypted_data.size(), key, read_file_data.iv, &decrypted_data[0]);
+@@ -1171,7 +1171,7 @@
+ }
+ 
+ void message_store::encrypt(crypto::public_key public_key, const std::string &plaintext,
+-                            std::string &ciphertext, crypto::public_key &encryption_public_key, crypto::chacha_iv &iv)
++                            std::string &ciphertext, crypto::public_key &encryption_public_key, crypto::chacha8_iv &iv)
+ {
+   crypto::secret_key encryption_secret_key;
+   crypto::generate_keys(encryption_public_key, encryption_secret_key);
+@@ -1180,21 +1180,21 @@
+   bool success = crypto::generate_key_derivation(public_key, encryption_secret_key, derivation);
+   THROW_WALLET_EXCEPTION_IF(!success, tools::error::wallet_internal_error, "Failed to generate key derivation for message encryption");
+ 
+-  crypto::chacha_key chacha_key;
+-  crypto::generate_chacha_key(&derivation, sizeof(derivation), chacha_key, 1);
+-  iv = crypto::rand<crypto::chacha_iv>();
++  crypto::chacha8_key chacha_key;
++  crypto::generate_chacha8_key(&derivation, sizeof(derivation), chacha_key);
++  iv = crypto::rand<crypto::chacha8_iv>();
+   ciphertext.resize(plaintext.size());
+   crypto::chacha20(plaintext.data(), plaintext.size(), chacha_key, iv, &ciphertext[0]);
+ }
+ 
+-void message_store::decrypt(const std::string &ciphertext, const crypto::public_key &encryption_public_key, const crypto::chacha_iv &iv,
++void message_store::decrypt(const std::string &ciphertext, const crypto::public_key &encryption_public_key, const crypto::chacha8_iv &iv,
+                             const crypto::secret_key &view_secret_key, std::string &plaintext)
+ {
+   crypto::key_derivation derivation;
+   bool success = crypto::generate_key_derivation(encryption_public_key, view_secret_key, derivation);
+   THROW_WALLET_EXCEPTION_IF(!success, tools::error::wallet_internal_error, "Failed to generate key derivation for message decryption");
+-  crypto::chacha_key chacha_key;
+-  crypto::generate_chacha_key(&derivation, sizeof(derivation), chacha_key, 1);
++  crypto::chacha8_key chacha_key;
++  crypto::generate_chacha8_key(&derivation, sizeof(derivation), chacha_key);
+   plaintext.resize(ciphertext.size());
+   crypto::chacha20(ciphertext.data(), ciphertext.size(), chacha_key, iv, &plaintext[0]);
+ }

@@ -1,0 +1,29 @@
+--- monero/src/wallet/wallet_args.cpp	2019-06-20 21:03:18.810815941 +0100
++++ haven/src/wallet/wallet_args.cpp	2019-06-05 12:45:14.777728762 +0100
+@@ -140,7 +140,7 @@
+ 
+       if (command_line::get_arg(vm, command_line::arg_help))
+       {
+-        Print(print) << "Monero '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")" << ENDL;
++        Print(print) << "Haven '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")" << ENDL;
+         Print(print) << wallet_args::tr("This is the command line monero wallet. It needs to connect to a monero\n"
+ 												  "daemon to work correctly.") << ENDL;
+         Print(print) << wallet_args::tr("Usage:") << ENDL << "  " << usage;
+@@ -150,7 +150,7 @@
+       }
+       else if (command_line::get_arg(vm, command_line::arg_version))
+       {
+-        Print(print) << "Monero '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")";
++        Print(print) << "Haven '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")";
+         should_terminate = true;
+         return true;
+       }
+@@ -201,7 +201,7 @@
+     if (!command_line::is_arg_defaulted(vm, arg_max_concurrency))
+       tools::set_max_concurrency(command_line::get_arg(vm, arg_max_concurrency));
+ 
+-    Print(print) << "Monero '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")";
++    Print(print) << "Haven '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")";
+ 
+     if (!command_line::is_arg_defaulted(vm, arg_log_level))
+       MINFO("Setting log level = " << command_line::get_arg(vm, arg_log_level));
