@@ -96,6 +96,22 @@
    }
    //---------------------------------------------------------------
    std::vector<uint64_t> relative_output_offsets_to_absolute(const std::vector<uint64_t>& off)
+@@ -1253,14 +1236,7 @@
+     return res;
+   }
+   //---------------------------------------------------------------
+-  crypto::hash get_block_longhash(const block& b, uint64_t height)
+-  {
+-    crypto::hash p = null_hash;
+-    get_block_longhash(b, p, height);
+-    return p;
+-  }
+-  //---------------------------------------------------------------
+-  bool parse_and_validate_block_from_blob(const blobdata& b_blob, block& b, crypto::hash *block_hash)
++  bool parse_and_validate_block_from_blob(const blobdata& b_blob, block& b)
+   {
+     std::stringstream ss;
+     ss << b_blob;
 @@ -1352,7 +1310,8 @@
    crypto::secret_key encrypt_key(crypto::secret_key key, const epee::wipeable_string &passphrase)
    {

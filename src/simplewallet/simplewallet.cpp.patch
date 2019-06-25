@@ -1,23 +1,6 @@
 --- monero/src/simplewallet/simplewallet.cpp	2019-06-20 21:03:18.790816107 +0100
 +++ haven/src/simplewallet/simplewallet.cpp	2019-05-30 17:58:17.153591954 +0100
-@@ -1,4 +1,4 @@
--// Copyright (c) 2014-2019, The Monero Project
-+// Copyright (c) 2014-2018, The Monero Project
- // 
- // All rights reserved.
- // 
-@@ -116,9 +116,7 @@
- #define LONG_PAYMENT_ID_SUPPORT_CHECK() \
-   do { \
-     if (!m_long_payment_id_support) { \
--      fail_msg_writer() << tr("Warning: Long payment IDs are obsolete."); \
--      fail_msg_writer() << tr("Long payment IDs are not encrypted on the blockchain, and will harm your privacy."); \
--      fail_msg_writer() << tr("Use --long-payment-id-support-bad-for-privacy if you really must use one, and warn the recipient they are using an obsolete feature that will disappear in the future."); \
-+      fail_msg_writer() << tr("Long payment IDs are obsolete. Use --long-payment-id-support if you really must use one, and warn the recipient they are using an obsolete feature that will disappear in the future."); \
-       return true; \
-     } \
-   } while(0)
-@@ -147,11 +145,11 @@
+@@ -147,7 +145,7 @@
    const command_line::arg_descriptor<bool> arg_allow_mismatched_daemon_version = {"allow-mismatched-daemon-version", sw::tr("Allow communicating with a daemon that uses a different RPC version"), false};
    const command_line::arg_descriptor<uint64_t> arg_restore_height = {"restore-height", sw::tr("Restore from specific blockchain height"), 0};
    const command_line::arg_descriptor<std::string> arg_restore_date = {"restore-date", sw::tr("Restore from estimated blockchain height on specified date"), ""};
@@ -26,20 +9,6 @@
    const command_line::arg_descriptor<bool> arg_create_address_file = {"create-address-file", sw::tr("Create an address file for new wallets"), false};
    const command_line::arg_descriptor<std::string> arg_subaddress_lookahead = {"subaddress-lookahead", tools::wallet2::tr("Set subaddress lookahead sizes to <major>:<minor>"), ""};
    const command_line::arg_descriptor<bool> arg_use_english_language_names = {"use-english-language-names", sw::tr("Display English language names"), false};
--  const command_line::arg_descriptor<bool> arg_long_payment_id_support = {"long-payment-id-support-bad-for-privacy", sw::tr("Support obsolete long (unencrypted) payment ids (using them harms your privacy)"), false};
-+  const command_line::arg_descriptor<bool> arg_long_payment_id_support = {"long-payment-id-support", sw::tr("Support obsolete long (unencrypted) payment ids"), false};
- 
-   const command_line::arg_descriptor< std::vector<std::string> > arg_command = {"command", ""};
- 
-@@ -192,7 +190,7 @@
-   const char* USAGE_CHECK_RESERVE_PROOF("check_reserve_proof <address> <signature_file> [<message>]");
-   const char* USAGE_SHOW_TRANSFERS("show_transfers [in|out|pending|failed|pool|coinbase] [index=<N1>[,<N2>,...]] [<min_height> [<max_height>]]");
-   const char* USAGE_UNSPENT_OUTPUTS("unspent_outputs [index=<N1>[,<N2>,...]] [<min_amount> [<max_amount>]]");
--  const char* USAGE_RESCAN_BC("rescan_bc [hard|soft|keep_ki] [start_height=0]");
-+  const char* USAGE_RESCAN_BC("rescan_bc [hard]");
-   const char* USAGE_SET_TX_NOTE("set_tx_note <txid> [free text note]");
-   const char* USAGE_GET_TX_NOTE("get_tx_note <txid>");
-   const char* USAGE_GET_DESCRIPTION("get_description");
 @@ -217,7 +215,7 @@
    const char* USAGE_MMS("mms [<subcommand> [<subcommand_parameters>]]");
    const char* USAGE_MMS_INIT("mms init <required_signers>/<authorized_signers> <own_label> <own_transport_address>");
@@ -49,23 +18,6 @@
    const char* USAGE_MMS_LIST("mms list");
    const char* USAGE_MMS_NEXT("mms next [sync]");
    const char* USAGE_MMS_SYNC("mms sync");
-@@ -235,16 +233,10 @@
-   const char* USAGE_MMS_AUTO_CONFIG("mms auto_config <auto_config_token>");
-   const char* USAGE_PRINT_RING("print_ring <key_image> | <txid>");
-   const char* USAGE_SET_RING("set_ring <filename> | ( <key_image> absolute|relative <index> [<index>...] )");
--  const char* USAGE_UNSET_RING("unset_ring <txid> | ( <key_image> [<key_image>...] )");
-   const char* USAGE_SAVE_KNOWN_RINGS("save_known_rings");
-   const char* USAGE_MARK_OUTPUT_SPENT("mark_output_spent <amount>/<offset> | <filename> [add]");
-   const char* USAGE_MARK_OUTPUT_UNSPENT("mark_output_unspent <amount>/<offset>");
-   const char* USAGE_IS_OUTPUT_SPENT("is_output_spent <amount>/<offset>");
--  const char* USAGE_FREEZE("freeze <key_image>");
--  const char* USAGE_THAW("thaw <key_image>");
--  const char* USAGE_FROZEN("frozen <key_image>");
--  const char* USAGE_NET_STATS("net_stats");
--  const char* USAGE_WELCOME("welcome");
-   const char* USAGE_VERSION("version");
-   const char* USAGE_HELP("help [<command>]");
- 
 @@ -444,7 +436,7 @@
      std::stringstream prompt;
      prompt << sw::tr("For URL: ") << url
@@ -123,87 +75,10 @@
  bool simple_wallet::blackball(const std::vector<std::string> &args)
  {
    uint64_t amount = std::numeric_limits<uint64_t>::max(), offset, num_offsets;
-@@ -2065,102 +2025,9 @@
-   return true;
- }
+@@ -2142,25 +2025,25 @@
  
--bool simple_wallet::freeze_thaw(const std::vector<std::string> &args, bool freeze)
--{
--  if (args.empty())
--  {
--    fail_msg_writer() << boost::format(tr("usage: %s <key_image>|<pubkey>")) % (freeze ? "freeze" : "thaw");
--    return true;
--  }
--  crypto::key_image ki;
--  if (!epee::string_tools::hex_to_pod(args[0], ki))
--  {
--    fail_msg_writer() << tr("failed to parse key image");
--    return true;
--  }
--  try
--  {
--    if (freeze)
--      m_wallet->freeze(ki);
--    else
--      m_wallet->thaw(ki);
--  }
--  catch (const std::exception &e)
--  {
--    fail_msg_writer() << e.what();
--    return true;
--  }
--
--  return true;
--}
--
--bool simple_wallet::freeze(const std::vector<std::string> &args)
--{
--  return freeze_thaw(args, true);
--}
--
--bool simple_wallet::thaw(const std::vector<std::string> &args)
--{
--  return freeze_thaw(args, false);
--}
--
--bool simple_wallet::frozen(const std::vector<std::string> &args)
--{
--  if (args.empty())
--  {
--    size_t ntd = m_wallet->get_num_transfer_details();
--    for (size_t i = 0; i < ntd; ++i)
--    {
--      if (!m_wallet->frozen(i))
--        continue;
--      const tools::wallet2::transfer_details &td = m_wallet->get_transfer_details(i);
--      message_writer() << tr("Frozen: ") << td.m_key_image << " " << cryptonote::print_money(td.amount());
--    }
--  }
--  else
--  {
--    crypto::key_image ki;
--    if (!epee::string_tools::hex_to_pod(args[0], ki))
--    {
--      fail_msg_writer() << tr("failed to parse key image");
--      return true;
--    }
--    if (m_wallet->frozen(ki))
--      message_writer() << tr("Frozen: ") << ki;
--    else
--      message_writer() << tr("Not frozen: ") << ki;
--  }
--  return true;
--}
--
--bool simple_wallet::net_stats(const std::vector<std::string> &args)
--{
--  message_writer() << std::to_string(m_wallet->get_bytes_sent()) + tr(" bytes sent");
--  message_writer() << std::to_string(m_wallet->get_bytes_received()) + tr(" bytes received");
--  return true;
--}
--
--bool simple_wallet::welcome(const std::vector<std::string> &args)
--{
+ bool simple_wallet::welcome(const std::vector<std::string> &args)
+ {
 -  message_writer() << tr("Welcome to Monero, the private cryptocurrency.");
 -  message_writer() << "";
 -  message_writer() << tr("Monero, like Bitcoin, is a cryptocurrency. That is, it is digital money.");
@@ -217,9 +92,22 @@
 -  message_writer() << tr("of the layers of privacy Monero provides. Be safe and practice defense in depth.");
 -  message_writer() << "";
 -  message_writer() << tr("Welcome to Monero and financial privacy. For more information, see https://getmonero.org/");
--  return true;
--}
--
++  message_writer() << tr("Welcome to Haven, the private cryptocurrency.");
++  message_writer() << "";
++  message_writer() << tr("Haven, like Bitcoin, is a cryptocurrency. That is, it is digital money.");
++  message_writer() << tr("Unlike Bitcoin, your Haven transactions and balance stay private, and not visible to the world by default.");
++  message_writer() << tr("However, you have the option of making those available to select parties, if you choose to.");
++  message_writer() << "";
++  message_writer() << tr("Haven protects your privacy on the blockchain, and while Haven strives to improve all the time,");
++  message_writer() << tr("no privacy technology can be 100% perfect, Haven included.");
++  message_writer() << tr("Haven cannot protect you from malware, and it may not be as effective as we hope against powerful adversaries.");
++  message_writer() << tr("Flaws in Haven may be discovered in the future, and attacks may be developed to peek under some");
++  message_writer() << tr("of the layers of privacy Haven provides. Be safe and practice defense in depth.");
++  message_writer() << "";
++  message_writer() << tr("Welcome to Haven and financial privacy. For more information, see https://havenprotocol.org/");
+   return true;
+ }
+ 
  bool simple_wallet::version(const std::vector<std::string> &args)
  {
 -  message_writer() << "Monero '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")";
@@ -266,47 +154,6 @@
      decimal_point = 0;
    else
    {
-@@ -2652,31 +2519,6 @@
-   return true;
- }
- 
--bool simple_wallet::set_setup_background_mining(const std::vector<std::string> &args/* = std::vector<std::string>()*/)
--{
--  const auto pwd_container = get_and_verify_password();
--  if (pwd_container)
--  {
--    tools::wallet2::BackgroundMiningSetupType setup = tools::wallet2::BackgroundMiningMaybe;
--    if (args[1] == "yes" || args[1] == "1")
--      setup = tools::wallet2::BackgroundMiningYes;
--    else if (args[1] == "no" || args[1] == "0")
--      setup = tools::wallet2::BackgroundMiningNo;
--    else
--    {
--      fail_msg_writer() << tr("invalid argument: must be either 1/yes or 0/no");
--      return true;
--    }
--    m_wallet->setup_background_mining(setup);
--    m_wallet->rewrite(m_wallet_file, pwd_container->password());
--    if (setup == tools::wallet2::BackgroundMiningYes)
--      start_background_mining();
--    else
--      stop_background_mining();
--  }
--  return true;
--}
--
- bool simple_wallet::set_device_name(const std::vector<std::string> &args/* = std::vector<std::string>()*/)
- {
-   const auto pwd_container = get_and_verify_password();
-@@ -2758,7 +2600,7 @@
-                            tr(USAGE_INCOMING_TRANSFERS),
-                            tr("Show the incoming transfers, all or filtered by availability and address index.\n\n"
-                               "Output format:\n"
--                              "Amount, Spent(\"T\"|\"F\"), \"frozen\"|\"locked\"|\"unlocked\", RingCT, Global Index, Transaction Hash, Address Index, [Public Key, Key Image] "));
-+                              "Amount, Spent(\"T\"|\"F\"), \"locked\"|\"unlocked\", RingCT, Global Index, Transaction Hash, Address Index, [Public Key, Key Image] "));
-   m_cmd_binder.set_handler("payments",
-                            boost::bind(&simple_wallet::show_payments, this, _1),
-                            tr(USAGE_PAYMENTS),
 @@ -2863,12 +2705,10 @@
                                    "  Set the wallet's refresh behaviour.\n "
                                    "priority [0|1|2|3|4]\n "
@@ -348,63 +195,21 @@
    m_cmd_binder.set_handler("mms list",
                             boost::bind(&simple_wallet::mms, this, _1),
                             tr(USAGE_MMS_LIST),
-@@ -3154,10 +2994,6 @@
-                            boost::bind(&simple_wallet::set_ring, this, _1),
-                            tr(USAGE_SET_RING),
-                            tr("Set the ring used for a given key image, so it can be reused in a fork"));
--  m_cmd_binder.set_handler("unset_ring",
--                           boost::bind(&simple_wallet::unset_ring, this, _1),
--                           tr(USAGE_UNSET_RING),
--                           tr("Unsets the ring used for a given key image or transaction"));
-   m_cmd_binder.set_handler("save_known_rings",
-                            boost::bind(&simple_wallet::save_known_rings, this, _1),
-                            tr(USAGE_SAVE_KNOWN_RINGS),
-@@ -3174,26 +3010,6 @@
-                            boost::bind(&simple_wallet::blackballed, this, _1),
-                            tr(USAGE_IS_OUTPUT_SPENT),
-                            tr("Checks whether an output is marked as spent"));
--  m_cmd_binder.set_handler("freeze",
--                           boost::bind(&simple_wallet::freeze, this, _1),
--                           tr(USAGE_FREEZE),
--                           tr("Freeze a single output by key image so it will not be used"));
--  m_cmd_binder.set_handler("thaw",
--                           boost::bind(&simple_wallet::thaw, this, _1),
--                           tr(USAGE_THAW),
--                           tr("Thaw a single output by key image so it may be used again"));
--  m_cmd_binder.set_handler("frozen",
--                           boost::bind(&simple_wallet::frozen, this, _1),
--                           tr(USAGE_FROZEN),
--                           tr("Checks whether a given output is currently frozen by key image"));
--  m_cmd_binder.set_handler("net_stats",
--                           boost::bind(&simple_wallet::net_stats, this, _1),
--                           tr(USAGE_NET_STATS),
--                           tr("Prints simple network stats"));
--  m_cmd_binder.set_handler("welcome",
--                           boost::bind(&simple_wallet::welcome, this, _1),
--                           tr(USAGE_WELCOME),
+@@ -3193,7 +3010,7 @@
+   m_cmd_binder.set_handler("welcome",
+                            boost::bind(&simple_wallet::welcome, this, _1),
+                            tr(USAGE_WELCOME),
 -                           tr("Prints basic info about Monero for first time users"));
++                           tr("Prints basic info about Haven for first time users"));
    m_cmd_binder.set_handler("version",
                             boost::bind(&simple_wallet::version, this, _1),
                             tr(USAGE_VERSION),
-@@ -3222,13 +3038,6 @@
-       case tools::wallet2::AskPasswordOnAction: ask_password_string = "action"; break;
-       case tools::wallet2::AskPasswordToDecrypt: ask_password_string = "decrypt"; break;
-     }
--    std::string setup_background_mining_string = "invalid";
--    switch (m_wallet->setup_background_mining())
--    {
--      case tools::wallet2::BackgroundMiningMaybe: setup_background_mining_string = "maybe"; break;
--      case tools::wallet2::BackgroundMiningYes: setup_background_mining_string = "yes"; break;
--      case tools::wallet2::BackgroundMiningNo: setup_background_mining_string = "no"; break;
--    }
-     success_msg_writer() << "seed = " << seed_language;
-     success_msg_writer() << "always-confirm-transfers = " << m_wallet->always_confirm_transfers();
-     success_msg_writer() << "print-ring-members = " << m_wallet->print_ring_members();
-@@ -3255,7 +3064,6 @@
+@@ -3255,7 +3064,7 @@
      success_msg_writer() << "segregation-height = " << m_wallet->segregation_height();
      success_msg_writer() << "ignore-fractional-outputs = " << m_wallet->ignore_fractional_outputs();
      success_msg_writer() << "track-uses = " << m_wallet->track_uses();
 -    success_msg_writer() << "setup-background-mining = " << setup_background_mining_string + tr(" (set this to support the network and to get a chance to receive new monero)");
++    success_msg_writer() << "setup-background-mining = " << setup_background_mining_string + tr(" (set this to support the network and to get a chance to receive new haven)");
      success_msg_writer() << "device_name = " << m_wallet->device_name();
      return true;
    }
@@ -417,28 +222,6 @@
      CHECK_SIMPLE_VARIABLE("min-outputs-count", set_min_output_count, tr("unsigned integer"));
      CHECK_SIMPLE_VARIABLE("min-outputs-value", set_min_output_value, tr("amount"));
      CHECK_SIMPLE_VARIABLE("merge-destinations", set_merge_destinations, tr("0 or 1"));
-@@ -3313,7 +3121,6 @@
-     CHECK_SIMPLE_VARIABLE("segregation-height", set_segregation_height, tr("unsigned integer"));
-     CHECK_SIMPLE_VARIABLE("ignore-fractional-outputs", set_ignore_fractional_outputs, tr("0 or 1"));
-     CHECK_SIMPLE_VARIABLE("track-uses", set_track_uses, tr("0 or 1"));
--    CHECK_SIMPLE_VARIABLE("setup-background-mining", set_setup_background_mining, tr("1/yes or 0/no"));
-     CHECK_SIMPLE_VARIABLE("device-name", set_device_name, tr("<device_name[:device_spec]>"));
-   }
-   fail_msg_writer() << tr("set: unrecognized argument(s)");
-@@ -3509,13 +3316,10 @@
-   const network_type nettype = testnet ? TESTNET : stagenet ? STAGENET : MAINNET;
- 
-   epee::wipeable_string multisig_keys;
--  epee::wipeable_string password;
- 
-   if (!handle_command_line(vm))
-     return false;
- 
--  bool welcome = false;
--
-   if((!m_generate_new.empty()) + (!m_wallet_file.empty()) + (!m_generate_from_device.empty()) + (!m_generate_from_view_key.empty()) + (!m_generate_from_spend_key.empty()) + (!m_generate_from_keys.empty()) + (!m_generate_from_multisig_keys.empty()) + (!m_generate_from_json.empty()) > 1)
-   {
-     fail_msg_writer() << tr("can't specify more than one of --generate-new-wallet=\"wallet_name\", --wallet-file=\"wallet_name\", --generate-from-view-key=\"wallet_name\", --generate-from-spend-key=\"wallet_name\", --generate-from-keys=\"wallet_name\", --generate-from-multisig-keys=\"wallet_name\", --generate-from-json=\"jsonfilename\" and --generate-from-device=\"wallet_name\"");
 @@ -3611,7 +3415,8 @@
          if (m_restore_multisig_wallet)
          {
@@ -457,65 +240,6 @@
      if (!m_generate_from_view_key.empty())
      {
        m_wallet_file = m_generate_from_view_key;
-@@ -3673,7 +3479,6 @@
-       auto r = new_wallet(vm, info.address, boost::none, viewkey);
-       CHECK_AND_ASSERT_MES(r, false, tr("account creation failed"));
-       password = *r;
--      welcome = true;
-     }
-     else if (!m_generate_from_spend_key.empty())
-     {
-@@ -3694,7 +3499,6 @@
-       auto r = new_wallet(vm, m_recovery_key, true, false, "");
-       CHECK_AND_ASSERT_MES(r, false, tr("account creation failed"));
-       password = *r;
--      welcome = true;
-     }
-     else if (!m_generate_from_keys.empty())
-     {
-@@ -3772,7 +3576,6 @@
-       auto r = new_wallet(vm, info.address, spendkey, viewkey);
-       CHECK_AND_ASSERT_MES(r, false, tr("account creation failed"));
-       password = *r;
--      welcome = true;
-     }
-     
-     // Asks user for all the data required to merge secret keys from multisig wallets into one master wallet, which then gets full control of the multisig wallet. The resulting wallet will be the same as any other regular wallet.
-@@ -3906,7 +3709,6 @@
-       auto r = new_wallet(vm, info.address, spendkey, viewkey);
-       CHECK_AND_ASSERT_MES(r, false, tr("account creation failed"));
-       password = *r;
--      welcome = true;
-     }
-     
-     else if (!m_generate_from_json.empty())
-@@ -3933,7 +3735,6 @@
-       auto r = new_wallet(vm);
-       CHECK_AND_ASSERT_MES(r, false, tr("account creation failed"));
-       password = *r;
--      welcome = true;
-       // if no block_height is specified, assume its a new account and start it "now"
-       if(m_wallet->get_refresh_from_block_height() == 0) {
-         {
-@@ -3965,7 +3766,6 @@
-         r = new_wallet(vm, m_recovery_key, m_restore_deterministic_wallet, m_non_deterministic, old_language);
-       CHECK_AND_ASSERT_MES(r, false, tr("account creation failed"));
-       password = *r;
--      welcome = true;
-     }
- 
-     if (m_restoring && m_generate_from_json.empty() && m_generate_from_device.empty())
-@@ -4069,9 +3869,8 @@
-       fail_msg_writer() << tr("can't specify --subaddress-lookahead and --wallet-file at the same time");
-       return false;
-     }
--    auto r = open_wallet(vm);
-+    bool r = open_wallet(vm);
-     CHECK_AND_ASSERT_MES(r, false, tr("failed to open account"));
--    password = *r;
-   }
-   if (!m_wallet)
-   {
 @@ -4087,19 +3886,6 @@
  
    m_wallet->callback(this);

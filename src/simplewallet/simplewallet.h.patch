@@ -1,11 +1,5 @@
 --- monero/src/simplewallet/simplewallet.h	2019-06-20 21:03:18.790816107 +0100
 +++ haven/src/simplewallet/simplewallet.h	2019-05-30 17:58:17.153591954 +0100
-@@ -1,4 +1,4 @@
--// Copyright (c) 2014-2019, The Monero Project
-+// Copyright (c) 2014-2018, The Monero Project
- // 
- // All rights reserved.
- // 
 @@ -84,7 +84,7 @@
      std::string get_command_usage(const std::vector<std::string> &args);
    private:

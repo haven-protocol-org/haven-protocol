@@ -1,11 +1,5 @@
 --- monero/src/crypto/slow-hash.c	2019-06-20 21:03:18.726816635 +0100
 +++ haven/src/crypto/slow-hash.c	2019-05-30 17:58:17.121592273 +0100
-@@ -1,4 +1,4 @@
--// Copyright (c) 2014-2019, The Monero Project
-+// Copyright (c) 2014-2018, The Monero Project
- //
- // All rights reserved.
- //
 @@ -39,11 +39,6 @@
  #include "hash-ops.h"
  #include "oaes_lib.h"

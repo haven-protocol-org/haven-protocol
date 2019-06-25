@@ -112,11 +112,11 @@
 +      weighted_timespans = minimum_timespan;
 +    }
 +
-+    uint64_t total_work = cumulative_difficulties.back() - cumulative_difficulties.front();
++    difficulty_type total_work = cumulative_difficulties.back() - cumulative_difficulties.front();
 +    assert(total_work > 0);
 +
 +    uint64_t low, high;
-+    mul(total_work, target, low, high);
++    mul(total_work.convert_to<uint64_t>(), target, low, high);
 +    if (high != 0) {
 +      return 0;
 +    }
@@ -180,6 +180,6 @@
 +    return next_difficulty;
 +  }
 +  
-
+ 
    std::string hex(difficulty_type v)
    {
