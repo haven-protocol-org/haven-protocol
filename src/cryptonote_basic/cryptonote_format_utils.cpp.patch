@@ -42,22 +42,6 @@
      const blobdata blob = tx_to_blob(t);
      const unsigned int unprunable_size = t.unprunable_size;
      const unsigned int prefix_size = t.prefix_size;
-@@ -1088,14 +1088,7 @@
- 
-     // we still need the size
-     if (blob_size)
--    {
--      if (!t.is_blob_size_valid())
--      {
--        t.blob_size = blob.size();
--        t.set_blob_size_valid(true);
--      }
--      *blob_size = t.blob_size;
--    }
-+      *blob_size = get_object_blobsize(t);
- 
-     return true;
-   }
 @@ -1218,19 +1195,25 @@
      return p;
    }
@@ -96,7 +80,7 @@
    }
    //---------------------------------------------------------------
    std::vector<uint64_t> relative_output_offsets_to_absolute(const std::vector<uint64_t>& off)
-@@ -1253,14 +1236,7 @@
+@@ -1253,13 +1236,6 @@
      return res;
    }
    //---------------------------------------------------------------
@@ -107,11 +91,9 @@
 -    return p;
 -  }
 -  //---------------------------------------------------------------
--  bool parse_and_validate_block_from_blob(const blobdata& b_blob, block& b, crypto::hash *block_hash)
-+  bool parse_and_validate_block_from_blob(const blobdata& b_blob, block& b)
+   bool parse_and_validate_block_from_blob(const blobdata& b_blob, block& b, crypto::hash *block_hash)
    {
      std::stringstream ss;
-     ss << b_blob;
 @@ -1352,7 +1310,8 @@
    crypto::secret_key encrypt_key(crypto::secret_key key, const epee::wipeable_string &passphrase)
    {
