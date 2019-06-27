@@ -1,5 +1,14 @@
 --- monero/src/cryptonote_basic/miner.cpp	2019-06-20 21:03:18.730816602 +0100
 +++ haven/src/cryptonote_basic/miner.cpp	2019-06-17 17:10:44.681734943 +0100
+@@ -81,8 +81,6 @@
+ #include "miner.h"
+ 
+ 
+-extern "C" void slow_hash_allocate_state();
+-extern "C" void slow_hash_free_state();
+ namespace cryptonote
+ {
+ 
 @@ -467,10 +387,11 @@
    //-----------------------------------------------------------------------------------------------------
    bool miner::find_nonce_for_given_block(block& bl, const difficulty_type& diffic, uint64_t height)
@@ -32,3 +41,11 @@
  
        if(check_hash(h, local_diff))
        {
+@@ -588,7 +509,6 @@
+       ++m_hashes;
+       ++m_total_hashes;
+     }
+-    slow_hash_free_state();
+     MGINFO("Miner thread stopped ["<< th_local_index << "]");
+     --m_threads_active;
+     return true;

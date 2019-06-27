@@ -14,9 +14,7 @@
      )
    {
 -    LOG_PRINT_L0("Monero '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ") Daemonised");
--    return t_daemon{vm, public_rpc_port};
 +    LOG_PRINT_L0("Haven '" << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ") Daemonised");
-+    return t_daemon{vm};
+     return t_daemon{vm, public_rpc_port};
    }
  
-   bool t_executor::run_non_interactive(

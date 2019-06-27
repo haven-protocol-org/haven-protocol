@@ -1,12 +1,6 @@
 --- monero/src/crypto/CMakeLists.txt	2019-06-20 21:03:18.722816669 +0100
 +++ haven/src/crypto/CMakeLists.txt	2019-05-30 17:58:17.109592393 +0100
-@@ -39,19 +39,14 @@
-   hash-extra-jh.c
-   hash-extra-skein.c
-   hash.c
--  hmac-keccak.c
-   jh.c
-   keccak.c
+@@ -45,13 +39,9 @@
    oaes_lib.c
    random.c
    skein.c
@@ -23,14 +17,6 @@
  
  set(crypto_headers)
  
-@@ -65,7 +60,6 @@
-   groestl_tables.h
-   hash-ops.h
-   hash.h
--  hmac-keccak.h
-   initializer.h
-   jh.h
-   keccak.h
 @@ -74,8 +68,7 @@
    random.h
    skein.h
@@ -41,47 +27,9 @@
  
  monero_private_headers(cncrypto
    ${crypto_private_headers})
-@@ -91,24 +84,23 @@
-   PRIVATE
-     ${EXTRA_LIBRARIES})
- 
--if (ARM)
--  option(NO_OPTIMIZED_MULTIPLY_ON_ARM
--	   "Compute multiply using generic C implementation instead of ARM ASM" OFF)
--  if(NO_OPTIMIZED_MULTIPLY_ON_ARM)
--    message(STATUS "Using generic C implementation for multiply")
--    set_property(SOURCE slow-hash.c
--      PROPERTY COMPILE_DEFINITIONS "NO_OPTIMIZED_MULTIPLY_ON_ARM")
--  endif()
--endif()
--
--# Because of the way Qt works on android with JNI, the code does not live in the main android thread
--# So this code runs with a 1 MB default stack size. 
--# This will force the use of the heap for the allocation of the scratchpad
--if (ANDROID OR IOS)
--  if( BUILD_GUI_DEPS )
--    add_definitions(-DFORCE_USE_HEAP=1)
--  endif()
--endif()
-+# if (ARM)
-+#   option(NO_OPTIMIZED_MULTIPLY_ON_ARM
-+# 	   "Compute multiply using generic C implementation instead of ARM ASM" OFF)
-+#   if(NO_OPTIMIZED_MULTIPLY_ON_ARM)
-+#     message(STATUS "Using generic C implementation for multiply")
-+#     set_property(SOURCE slow-hash.c
-+#       PROPERTY COMPILE_DEFINITIONS "NO_OPTIMIZED_MULTIPLY_ON_ARM")
-+#   endif()
-+# endif()
-+#
-+# # Because of the way Qt works on android with JNI, the code does not live in the main android thread
-+# # So this code runs with a 1 MB default stack size.
-+# # This will force the use of the heap for the allocation of the scratchpad
-+# if (ANDROID OR IOS)
-+#   if( BUILD_GUI_DEPS )
-+#     add_definitions(-DFORCE_USE_HEAP=1)
-+#   endif()
-+# endif()
-+
+@@ -110,5 +84,3 @@
+   endif()
+ endif()
  
 -# cheat because cmake and ccache hate each other
 -set_property(SOURCE CryptonightR_template.S PROPERTY LANGUAGE C)

@@ -64,7 +64,7 @@
 +    crypto::chacha8_key get_ringdb_key();
      void setup_keys(const epee::wipeable_string &password);
      size_t get_transfer_details(const crypto::key_image &ki) const;
-    
+ 
 @@ -1525,7 +1437,7 @@
      std::string m_ring_database;
      bool m_ring_history_saved;

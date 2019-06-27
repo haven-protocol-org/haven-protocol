@@ -129,7 +129,7 @@
      }
  
      res.status = CORE_RPC_STATUS_OK;
-@@ -1435,9 +1317,19 @@
+@@ -1438,9 +1317,19 @@
      response.reward = get_block_reward(blk);
      response.block_size = response.block_weight = m_core.get_blockchain_storage().get_db().get_block_weight(height);
      response.num_txes = blk.tx_hashes.size();

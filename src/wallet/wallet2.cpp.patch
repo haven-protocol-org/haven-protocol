@@ -189,7 +189,7 @@
      m_account.decrypt_keys(chacha_key);
      keys_reencryptor = epee::misc_utils::create_scope_leave_handler([&, this, chacha_key]() { m_account.encrypt_keys(chacha_key); m_account.decrypt_viewkey(chacha_key); });
 @@ -5215,15 +4891,15 @@
-   return true;
+   }
  }
  //----------------------------------------------------------------------------------------------------
 -bool wallet2::generate_chacha_key_from_secret_keys(crypto::chacha_key &key) const
