@@ -3,8 +3,10 @@
 This repository is a test-bed to attempt to perform a full rebase of the latest monero code
 (currently v0.14.1.0) using a series of patch files.
 
-To build haven, simply:
+To build haven, simply run the following commands:
 
-1. run the "build-haven.sh" script
+1. ./build-haven.sh
+2. cd monero
+3. make clean-all
+4. make release
 
-2. enjoy!
