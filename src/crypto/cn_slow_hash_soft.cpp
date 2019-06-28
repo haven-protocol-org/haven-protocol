@@ -29,7 +29,10 @@
 // Parts of this file are originally copyright (c) 2012-2013, The Cryptonote developers
 
 #include "cn_slow_hash.hpp"
+
+extern "C" {
 #include "keccak.h"
+}
 
 /*
 AES Tables Implementation is

@@ -1,16 +1,13 @@
 --- monero/src/cryptonote_basic/difficulty.cpp	2019-06-20 21:03:18.730816602 +0100
 +++ haven/src/cryptonote_basic/difficulty.cpp	2019-05-30 17:58:17.121592273 +0100
-@@ -33,8 +35,9 @@
+@@ -33,6 +35,7 @@
  #include <cstddef>
  #include <cstdint>
  #include <vector>
 +#include <boost/math/special_functions/round.hpp>
  
--#include "int-util.h"
-+#include "common/int-util.h"
+ #include "int-util.h"
  #include "crypto/hash.h"
- #include "cryptonote_config.h"
- #include "difficulty.h"
 @@ -200,44 +200,133 @@
        return check_hash_128(hash, difficulty);
    }
