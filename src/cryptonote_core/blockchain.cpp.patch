@@ -98,6 +98,15 @@
  };
  
  //------------------------------------------------------------------
+@@ -429,7 +380,7 @@
+     MINFO("Blockchain not loaded, generating genesis block.");
+     block bl;
+     block_verification_context bvc = boost::value_initialized<block_verification_context>();
+-    generate_genesis_block(bl, get_config(m_nettype).GENESIS_TX, get_config(m_nettype).GENESIS_NONCE);
++    generate_genesis_block(bl, get_config(m_nettype).GENESIS_TX, get_config(m_nettype).GENESIS_NONCE, m_nettype == TESTNET);
+     db_wtxn_guard wtxn_guard(m_db);
+     add_new_block(bl, bvc);
+     CHECK_AND_ASSERT_MES(!bvc.m_verifivation_failed, false, "Failed to add genesis block to blockchain");
 @@ -452,9 +389,9 @@
    uint64_t top_block_timestamp = m_db->get_top_block_timestamp();
    uint64_t timestamp_diff = time(NULL) - top_block_timestamp;
@@ -279,6 +288,24 @@
    if(base_reward + fee < money_in_use)
    {
      MERROR_VER("coinbase transaction spend too much money (" << print_money(money_in_use) << "). Block reward is " << print_money(base_reward + fee) << "(" << print_money(base_reward) << "+" << print_money(fee) << ")");
+@@ -1530,7 +1421,7 @@
+   //make blocks coin-base tx looks close to real coinbase tx to get truthful blob weight
+   uint8_t hf_version = b.major_version;
+   size_t max_outs = hf_version >= 4 ? 1 : 11;
+-  bool r = construct_miner_tx(height, median_weight, already_generated_coins, txs_weight, fee, miner_address, b.miner_tx, ex_nonce, max_outs, hf_version);
++  bool r = construct_miner_tx(height, median_weight, already_generated_coins, txs_weight, fee, miner_address, b.miner_tx, ex_nonce, max_outs, hf_version, m_nettype == TESTNET);
+   CHECK_AND_ASSERT_MES(r, false, "Failed to construct miner tx, first chance");
+   size_t cumulative_weight = txs_weight + get_transaction_weight(b.miner_tx);
+ #if defined(DEBUG_CREATE_BLOCK_TEMPLATE)
+@@ -1539,7 +1432,7 @@
+ #endif
+   for (size_t try_count = 0; try_count != 10; ++try_count)
+   {
+-    r = construct_miner_tx(height, median_weight, already_generated_coins, cumulative_weight, fee, miner_address, b.miner_tx, ex_nonce, max_outs, hf_version);
++    r = construct_miner_tx(height, median_weight, already_generated_coins, cumulative_weight, fee, miner_address, b.miner_tx, ex_nonce, max_outs, hf_version, m_nettype == TESTNET);
+ 
+     CHECK_AND_ASSERT_MES(r, false, "Failed to construct miner tx, second chance");
+     size_t coinbase_weight = get_transaction_weight(b.miner_tx);
 @@ -1742,7 +1616,7 @@
      difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);
      CHECK_AND_ASSERT_MES(current_diff, false, "!!!!!!! DIFFICULTY OVERHEAD !!!!!!!");

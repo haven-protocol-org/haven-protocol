@@ -211,13 +211,19 @@
  
      //lock
      tx.unlock_time = height + CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW;
-@@ -649,8 +759,16 @@
+@@ -644,13 +759,22 @@
+       block& bl
+     , std::string const & genesis_tx
+     , uint32_t nonce
++    , bool testnet
+     )
+   {
      //genesis block
      bl = boost::value_initialized<block>();
  
 +    account_public_address ac = boost::value_initialized<account_public_address>();
 +    std::vector<size_t> sz;
-+    construct_miner_tx(0, 0, 0, 0, 0, ac, bl.miner_tx, blobdata(), 999, 1); // zero fee in genesis
++    construct_miner_tx(0, 0, 0, 0, 0, ac, bl.miner_tx, blobdata(), 999, 1, testnet); // zero fee in genesis
 +    blobdata txb = tx_to_blob(bl.miner_tx);
 +    std::string hex_tx_represent = string_tools::buff_to_hex_nodelimer(txb);
 +

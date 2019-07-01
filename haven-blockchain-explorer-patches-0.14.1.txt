@@ -1,0 +1,892 @@
+diff --git a/README.md b/README.md
+index 8d4110c..7946fdb 100644
+--- a/README.md
++++ b/README.md
+@@ -221,8 +221,8 @@ xmrblocks, Onion Monero Blockchain Explorer:
+                                         functionality
+   --ssl-key-file arg                    path to key file for ssl (https)
+                                         functionality
+-  -d [ --deamon-url ] arg (=http:://127.0.0.1:18081)
+-                                        Monero deamon url
++  -d [ --daemon-url ] arg (=http:://127.0.0.1:18081)
++                                        Monero daemon url
+ ```
+ 
+ Example usage, defined as bash aliases.
+diff --git a/main.cpp b/main.cpp
+index 93fca21..933fa4d 100644
+--- a/main.cpp
++++ b/main.cpp
+@@ -55,7 +55,7 @@ main(int ac, const char* av[])
+     auto port_opt                      = opts.get_option<string>("port");
+     auto bindaddr_opt                  = opts.get_option<string>("bindaddr");
+     auto bc_path_opt                   = opts.get_option<string>("bc-path");
+-    auto deamon_url_opt                = opts.get_option<string>("deamon-url");
++    auto daemon_url_opt                = opts.get_option<string>("daemon-url");
+     auto ssl_crt_file_opt              = opts.get_option<string>("ssl-crt-file");
+     auto ssl_key_file_opt              = opts.get_option<string>("ssl-key-file");
+     auto no_blocks_on_index_opt        = opts.get_option<string>("no-blocks-on-index");
+@@ -180,12 +180,12 @@ main(int ac, const char* av[])
+         return EXIT_FAILURE;
+     }
+ 
+-    string deamon_url {*deamon_url_opt};
++    string daemon_url {*daemon_url_opt};
+ 
+-    if (testnet && deamon_url == "http:://127.0.0.1:18081")
+-        deamon_url = "http:://127.0.0.1:28081";
+-    if (stagenet && deamon_url == "http:://127.0.0.1:18081")
+-        deamon_url = "http:://127.0.0.1:38081";
++    if (testnet && daemon_url == "http:://127.0.0.1:17750")
++        daemon_url = "http:://127.0.0.1:27750";
++    if (stagenet && daemon_url == "http:://127.0.0.1:17750")
++        daemon_url = "http:://127.0.0.1:37750";
+ 
+     uint64_t mempool_info_timeout {5000};
+ 
+@@ -222,8 +222,8 @@ main(int ac, const char* av[])
+                 = blockchain_path;
+         xmreg::CurrentBlockchainStatus::nettype
+                 = nettype;
+-        xmreg::CurrentBlockchainStatus::deamon_url
+-                = deamon_url;
++        xmreg::CurrentBlockchainStatus::daemon_url
++                = daemon_url;
+         xmreg::CurrentBlockchainStatus::set_blockchain_variables(
+                 &mcore, core_storage);
+ 
+@@ -239,8 +239,8 @@ main(int ac, const char* av[])
+             = blockchain_path;
+     xmreg::MempoolStatus::nettype
+             = nettype;
+-    xmreg::MempoolStatus::deamon_url
+-            = deamon_url;
++    xmreg::MempoolStatus::daemon_url
++            = daemon_url;
+     xmreg::MempoolStatus::set_blockchain_variables(
+             &mcore, core_storage);
+ 
+@@ -272,7 +272,7 @@ main(int ac, const char* av[])
+     // contains logic for the website
+     xmreg::page xmrblocks(&mcore,
+                           core_storage,
+-                          deamon_url,
++                          daemon_url,
+                           nettype,
+                           enable_pusher,
+                           enable_js,
+diff --git a/src/CmdLineOptions.cpp b/src/CmdLineOptions.cpp
+index 3ff85c4..fa744e9 100644
+--- a/src/CmdLineOptions.cpp
++++ b/src/CmdLineOptions.cpp
+@@ -18,7 +18,7 @@ namespace xmreg
+         p.add("txhash", -1);
+ 
+         options_description desc(
+-                "xmrblocks, Onion Monero Blockchain Explorer");
++                "xmrblocks, Haven Blockchain Explorer");
+ 
+         desc.add_options()
+                 ("help,h", value<bool>()->default_value(false)->implicit_value(true),
+@@ -50,7 +50,7 @@ namespace xmreg
+                 ("enable-autorefresh-option", value<bool>()->default_value(false)->implicit_value(true),
+                  "enable users to have the index page on autorefresh")
+                 ("enable-emission-monitor", value<bool>()->default_value(false)->implicit_value(true),
+-                 "enable Monero total emission monitoring thread")
++                 "enable Haven total emission monitoring thread")
+                 ("port,p", value<string>()->default_value("8081"),
+                  "default explorer port")
+                 ("bindaddr,x", value<string>()->default_value("0.0.0.0"),
+@@ -68,13 +68,13 @@ namespace xmreg
+                 ("mempool-refresh-time", value<string>()->default_value("5"),
+                  "time, in seconds, for each refresh of mempool state")
+                 ("bc-path,b", value<string>(),
+-                 "path to lmdb folder of the blockchain, e.g., ~/.bitmonero/lmdb")
++                 "path to lmdb folder of the blockchain, e.g., ~/.haven/lmdb")
+                 ("ssl-crt-file", value<string>(),
+                  "path to crt file for ssl (https) functionality")
+                 ("ssl-key-file", value<string>(),
+                  "path to key file for ssl (https) functionality")
+-                ("deamon-url,d", value<string>()->default_value("http:://127.0.0.1:18081"),
+-                 "Monero deamon url");
++                ("daemon-url,d", value<string>()->default_value("http:://127.0.0.1:17750"),
++                 "Haven daemon url");
+ 
+ 
+         store(command_line_parser(acc, avv)
+diff --git a/src/CurrentBlockchainStatus.cpp b/src/CurrentBlockchainStatus.cpp
+index 040f01d..66f118a 100644
+--- a/src/CurrentBlockchainStatus.cpp
++++ b/src/CurrentBlockchainStatus.cpp
+@@ -32,7 +32,7 @@ CurrentBlockchainStatus::start_monitor_blockchain_thread()
+     {
+         if (!load_current_emission_amount())
+         {
+-            cerr << "Emission file cant be read, got corrupted or has incorrect format:\n " << emmision_saved_file
++            cerr << "Emission file can't be read, got corrupted or has incorrect format:\n " << emmision_saved_file
+                  << "\nEmission monitoring thread is not started.\nDelete the file and"
+                  << " restart the explorer or disable emission monitoring."
+                  << endl;
+@@ -205,7 +205,7 @@ CurrentBlockchainStatus::load_current_emission_amount()
+ 
+     if (strs.empty())
+     {
+-        cerr << "Problem spliting string values form  emission_amount." << endl;
++        cerr << "Problem spliting string values from emission_amount." << endl;
+         return false;
+     }
+ 
+@@ -297,13 +297,13 @@ CurrentBlockchainStatus::is_thread_running()
+    return is_running;
+ }
+ 
+-bf::path CurrentBlockchainStatus::blockchain_path {"/home/mwo/.bitmonero/lmdb"};
++bf::path CurrentBlockchainStatus::blockchain_path {"~/.haven/lmdb"};
+ 
+ cryptonote::network_type CurrentBlockchainStatus::nettype {cryptonote::network_type::MAINNET};
+ 
+ string CurrentBlockchainStatus::output_file {"emission_amount.txt"};
+ 
+-string CurrentBlockchainStatus::deamon_url {"http:://127.0.0.1:18081"};
++string CurrentBlockchainStatus::daemon_url {"http:://127.0.0.1:17750"};
+ 
+ uint64_t  CurrentBlockchainStatus::blockchain_chunk_size {10000};
+ 
+diff --git a/src/CurrentBlockchainStatus.h b/src/CurrentBlockchainStatus.h
+index 54e0bc1..580ca64 100644
+--- a/src/CurrentBlockchainStatus.h
++++ b/src/CurrentBlockchainStatus.h
+@@ -51,7 +51,7 @@ struct CurrentBlockchainStatus
+ 
+     static string output_file;
+ 
+-    static string deamon_url;
++    static string daemon_url;
+ 
+     // how many blocks to read before thread goes to sleep
+     static uint64_t blockchain_chunk_size;
+diff --git a/src/MempoolStatus.cpp b/src/MempoolStatus.cpp
+index 4c18fca..c8edc88 100644
+--- a/src/MempoolStatus.cpp
++++ b/src/MempoolStatus.cpp
+@@ -97,7 +97,7 @@ MempoolStatus::start_mempool_status_thread()
+ bool
+ MempoolStatus::read_mempool()
+ {
+-    rpccalls rpc {deamon_url};
++    rpccalls rpc {daemon_url};
+ 
+     string error_msg;
+ 
+@@ -242,7 +242,7 @@ MempoolStatus::read_mempool()
+ bool
+ MempoolStatus::read_network_info()
+ {
+-    rpccalls rpc {deamon_url};
++    rpccalls rpc {daemon_url};
+ 
+     COMMAND_RPC_GET_INFO::response rpc_network_info;
+ 
+@@ -341,8 +341,8 @@ MempoolStatus::is_thread_running()
+     return is_running;
+ }
+ 
+-bf::path MempoolStatus::blockchain_path {"/home/mwo/.bitmonero/lmdb"};
+-string MempoolStatus::deamon_url {"http:://127.0.0.1:18081"};
++bf::path MempoolStatus::blockchain_path {"~/.haven/lmdb"};
++string MempoolStatus::daemon_url {"http:://127.0.0.1:17750"};
+ cryptonote::network_type MempoolStatus::nettype {cryptonote::network_type::MAINNET};
+ atomic<bool>       MempoolStatus::is_running {false};
+ boost::thread      MempoolStatus::m_thread;
+diff --git a/src/MempoolStatus.h b/src/MempoolStatus.h
+index 06e02f9..07886dd 100644
+--- a/src/MempoolStatus.h
++++ b/src/MempoolStatus.h
+@@ -125,7 +125,7 @@ struct MempoolStatus
+     static atomic<uint64_t> mempool_size; // size in bytes.
+ 
+     static bf::path blockchain_path;
+-    static string deamon_url;
++    static string daemon_url;
+     static cryptonote::network_type nettype;
+ 
+     // make object for accessing the blockchain here
+diff --git a/src/monero_headers.h b/src/monero_headers.h
+index fdf0aa0..27e1554 100644
+--- a/src/monero_headers.h
++++ b/src/monero_headers.h
+@@ -9,10 +9,10 @@
+ #define BLOCKCHAIN_DB DB_LMDB
+ 
+ 
+-#define UNSIGNED_TX_PREFIX "Monero unsigned tx set\003"
+-#define SIGNED_TX_PREFIX "Monero signed tx set\003"
+-#define KEY_IMAGE_EXPORT_FILE_MAGIC "Monero key image export\002"
+-#define OUTPUT_EXPORT_FILE_MAGIC "Monero output export\003"
++#define UNSIGNED_TX_PREFIX "Haven unsigned tx set\003"
++#define SIGNED_TX_PREFIX "Haven signed tx set\003"
++#define KEY_IMAGE_EXPORT_FILE_MAGIC "Haven key image export\002"
++#define OUTPUT_EXPORT_FILE_MAGIC "Haven output export\003"
+ 
+ #define FEE_ESTIMATE_GRACE_BLOCKS 10 // estimate fee valid for that many blocks
+ 
+diff --git a/src/page.h b/src/page.h
+index 3f7d3d7..223b7e6 100644
+--- a/src/page.h
++++ b/src/page.h
+@@ -459,7 +459,7 @@ public:
+ 
+ page(MicroCore* _mcore,
+      Blockchain* _core_storage,
+-     string _deamon_url,
++     string _daemon_url,
+      cryptonote::network_type _nettype,
+      bool _enable_pusher,
+      bool _enable_js,
+@@ -478,7 +478,7 @@ page(MicroCore* _mcore,
+      string _mainnet_url)
+         : mcore {_mcore},
+           core_storage {_core_storage},
+-          rpc {_deamon_url},
++          rpc {_daemon_url},
+           server_timestamp {std::time(nullptr)},
+           nettype {_nettype},
+           enable_pusher {_enable_pusher},
+@@ -603,9 +603,9 @@ index2(uint64_t page_no = 0, bool refresh_page = false)
+ {
+ 
+     // we get network info, such as current hash rate
+-    // but since this makes a rpc call to deamon, we make it as an async
++    // but since this makes a rpc call to daemon, we make it as an async
+     // call. this way we dont have to wait with execution of the rest of the
+-    // index2 method, until deamon gives as the required result.
++    // index2 method, until daemon gives as the required result.
+     std::future<json> network_info_ftr = std::async(std::launch::async, [&]
+     {
+         json j_info;
+@@ -1290,7 +1290,9 @@ show_block(uint64_t _blk_height)
+ 
+     // initalise page tempate map with basic info about blockchain
+ 
+-    string blk_pow_hash_str = pod_to_hex(get_block_longhash(blk, _blk_height));
++    crypto::hash proof_of_work = null_hash;
++    cn_pow_hash_v3 pow_ctx;
++    string blk_pow_hash_str = pod_to_hex(get_block_longhash(blk, pow_ctx, proof_of_work));
+     uint64_t blk_difficulty = core_storage->get_db().get_block_difficulty(_blk_height);
+ 
+     mstch::map context {
+@@ -2153,7 +2155,7 @@ show_my_outputs(string tx_hash_str,
+ 
+     if (xmr_address_str.empty())
+     {
+-        return string("Monero address not provided!");
++        return string("Haven address not provided!");
+     }
+ 
+     if (viewkey_str.empty())
+@@ -3946,7 +3948,7 @@ show_checkrawkeyimgs(string raw_data, string viewkey_str)
+     const size_t header_lenght = 2 * sizeof(crypto::public_key);
+     const size_t key_img_size  = sizeof(crypto::key_image);
+     const size_t record_lenght = key_img_size + sizeof(crypto::signature);
+-    const size_t chacha_length = sizeof(crypto::chacha_key);
++    const size_t chacha_length = sizeof(crypto::chacha8_key);
+ 
+     if (decoded_raw_data.size() < header_lenght)
+     {
+@@ -5493,7 +5495,7 @@ json_outputs(string tx_hash_str,
+     if (address_str.empty())
+     {
+         j_response["status"]  = "error";
+-        j_response["message"] = "Monero address not provided";
++        j_response["message"] = "Haven address not provided";
+         return j_response;
+     }
+ 
+@@ -5530,7 +5532,7 @@ json_outputs(string tx_hash_str,
+     if (!xmreg::parse_str_address(address_str,  address_info, nettype))
+     {
+         j_response["status"]  = "error";
+-        j_response["message"] = "Cant parse monero address: " + address_str;
++        j_response["message"] = "Cant parse haven address: " + address_str;
+         return j_response;
+ 
+     }
+@@ -5718,7 +5720,7 @@ json_outputsblocks(string _limit,
+     if (address_str.empty())
+     {
+         j_response["status"]  = "error";
+-        j_response["message"] = "Monero address not provided";
++        j_response["message"] = "Haven address not provided";
+         return j_response;
+     }
+ 
+@@ -5735,7 +5737,7 @@ json_outputsblocks(string _limit,
+     if (!xmreg::parse_str_address(address_str, address_info, nettype))
+     {
+         j_response["status"]  = "error";
+-        j_response["message"] = "Cant parse monero address: " + address_str;
++        j_response["message"] = "Cant parse haven address: " + address_str;
+         return j_response;
+ 
+     }
+@@ -5884,7 +5886,7 @@ json_networkinfo()
+     if (!get_monero_network_info(j_info))
+     {
+         j_response["status"]  = "error";
+-        j_response["message"] = "Cant get monero network info";
++        j_response["message"] = "Cant get haven network info";
+         return j_response;
+     }
+ 
+diff --git a/src/rpccalls.cpp b/src/rpccalls.cpp
+index c5ec95f..c06d9e2 100644
+--- a/src/rpccalls.cpp
++++ b/src/rpccalls.cpp
+@@ -8,24 +8,24 @@ namespace xmreg
+ {
+ 
+ 
+-rpccalls::rpccalls(string _deamon_url,
++rpccalls::rpccalls(string _daemon_url,
+          uint64_t _timeout)
+-        : deamon_url {_deamon_url},
++        : daemon_url {_daemon_url},
+           timeout_time {_timeout}
+ {
+-    epee::net_utils::parse_url(deamon_url, url);
++    epee::net_utils::parse_url(daemon_url, url);
+ 
+     port = std::to_string(url.port);
+ 
+     timeout_time_ms = std::chrono::milliseconds {timeout_time};
+ 
+     m_http_client.set_server(
+-            deamon_url,
++            daemon_url,
+             boost::optional<epee::net_utils::http::login>{});
+ }
+ 
+ bool
+-rpccalls::connect_to_monero_deamon()
++rpccalls::connect_to_monero_daemon()
+ {
+     //std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+@@ -45,9 +45,9 @@ rpccalls::get_current_height()
+ 
+     std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-    if (!connect_to_monero_deamon())
++    if (!connect_to_monero_daemon())
+     {
+-        cerr << "get_current_height: not connected to deamon" << endl;
++        cerr << "get_current_height: not connected to daemon" << endl;
+         return false;
+     }
+ 
+@@ -57,8 +57,8 @@ rpccalls::get_current_height()
+ 
+     if (!r)
+     {
+-        cerr << "Error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "Error connecting to haven daemon at "
++             << daemon_url << endl;
+         return 0;
+     }
+ 
+@@ -77,9 +77,9 @@ rpccalls::get_mempool(vector<tx_info>& mempool_txs)
+     {
+         std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-        if (!connect_to_monero_deamon())
++        if (!connect_to_monero_daemon())
+         {
+-            cerr << "get_mempool: not connected to deamon" << endl;
++            cerr << "get_mempool: not connected to daemon" << endl;
+             return false;
+         }
+ 
+@@ -90,8 +90,8 @@ rpccalls::get_mempool(vector<tx_info>& mempool_txs)
+ 
+     if (!r || res.status != CORE_RPC_STATUS_OK)
+     {
+-        cerr << "Error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "Error connecting to haven daemon at "
++             << daemon_url << endl;
+         return false;
+     }
+ 
+@@ -124,9 +124,9 @@ rpccalls::commit_tx(tools::wallet2::pending_tx& ptx, string& error_msg)
+ 
+     std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-    if (!connect_to_monero_deamon())
++    if (!connect_to_monero_daemon())
+     {
+-        cerr << "commit_tx: not connected to deamon" << endl;
++        cerr << "commit_tx: not connected to daemon" << endl;
+         return false;
+     }
+ 
+@@ -163,9 +163,9 @@ rpccalls::get_network_info(COMMAND_RPC_GET_INFO::response& response)
+     {
+         std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-        if (!connect_to_monero_deamon())
++        if (!connect_to_monero_daemon())
+         {
+-            cerr << "get_network_info: not connected to deamon" << endl;
++            cerr << "get_network_info: not connected to daemon" << endl;
+             return false;
+         }
+ 
+@@ -189,15 +189,15 @@ rpccalls::get_network_info(COMMAND_RPC_GET_INFO::response& response)
+ 
+         if (!err.empty())
+         {
+-            cerr << "Error connecting to Monero deamon due to "
++            cerr << "Error connecting to haven daemon due to "
+                  << err << endl;
+             return false;
+         }
+     }
+     else
+     {
+-        cerr << "Error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "Error connecting to haven daemon at "
++             << daemon_url << endl;
+         return false;
+     }
+ 
+@@ -223,9 +223,9 @@ rpccalls::get_hardfork_info(COMMAND_RPC_HARD_FORK_INFO::response& response)
+     {
+         std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-        if (!connect_to_monero_deamon())
++        if (!connect_to_monero_daemon())
+         {
+-            cerr << "get_hardfork_info: not connected to deamon" << endl;
++            cerr << "get_hardfork_info: not connected to daemon" << endl;
+             return false;
+         }
+ 
+@@ -250,15 +250,15 @@ rpccalls::get_hardfork_info(COMMAND_RPC_HARD_FORK_INFO::response& response)
+ 
+         if (!err.empty())
+         {
+-            cerr << "Error connecting to Monero deamon due to "
++            cerr << "Error connecting to haven daemon due to "
+                  << err << endl;
+             return false;
+         }
+     }
+     else
+     {
+-        cerr << "Error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "Error connecting to haven daemon at "
++             << daemon_url << endl;
+         return false;
+     }
+ 
+@@ -291,9 +291,9 @@ rpccalls::get_dynamic_per_kb_fee_estimate(
+     {
+         std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-        if (!connect_to_monero_deamon())
++        if (!connect_to_monero_daemon())
+         {
+-            cerr << "get_dynamic_per_kb_fee_estimate: not connected to deamon" << endl;
++            cerr << "get_dynamic_per_kb_fee_estimate: not connected to daemon" << endl;
+             return false;
+         }
+ 
+@@ -318,15 +318,15 @@ rpccalls::get_dynamic_per_kb_fee_estimate(
+ 
+         if (!err.empty())
+         {
+-            cerr << "Error connecting to Monero deamon due to "
++            cerr << "Error connecting to haven daemon due to "
+                  << err << endl;
+             return false;
+         }
+     }
+     else
+     {
+-        cerr << "Error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "Error connecting to haven daemon at "
++             << daemon_url << endl;
+         return false;
+     }
+ 
+@@ -354,9 +354,9 @@ rpccalls::get_block(string const& blk_hash, block& blk, string& error_msg)
+     {
+         std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-        if (!connect_to_monero_deamon())
++        if (!connect_to_monero_daemon())
+         {
+-            cerr << "get_block: not connected to deamon" << endl;
++            cerr << "get_block: not connected to daemon" << endl;
+             return false;
+         }
+ 
+@@ -381,15 +381,15 @@ rpccalls::get_block(string const& blk_hash, block& blk, string& error_msg)
+ 
+         if (!err.empty())
+         {
+-            cerr << "Error connecting to Monero deamon due to "
++            cerr << "Error connecting to haven daemon due to "
+                  << err << endl;
+             return false;
+         }
+     }
+     else
+     {
+-        cerr << "get_block: error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "get_block: error connecting to haven daemon at "
++             << daemon_url << endl;
+         return false;
+     }
+ 
+diff --git a/src/rpccalls.h b/src/rpccalls.h
+index 720936e..40792ac 100644
+--- a/src/rpccalls.h
++++ b/src/rpccalls.h
+@@ -67,7 +67,7 @@ using namespace std;
+ 
+ class rpccalls
+ {
+-    string deamon_url ;
++    string daemon_url ;
+     uint64_t timeout_time;
+ 
+     std::chrono::milliseconds timeout_time_ms;
+@@ -81,11 +81,11 @@ class rpccalls
+ 
+ public:
+ 
+-    rpccalls(string _deamon_url = "http:://127.0.0.1:18081",
++    rpccalls(string _daemon_url = "http:://127.0.0.1:17750",
+              uint64_t _timeout = 200000);
+ 
+     bool
+-    connect_to_monero_deamon();
++    connect_to_monero_daemon();
+ 
+     uint64_t
+     get_current_height();
+@@ -130,9 +130,9 @@ public:
+         {
+             std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-            if (!connect_to_monero_deamon())
++            if (!connect_to_monero_daemon())
+             {
+-                cerr << "get_alt_blocks: not connected to deamon" << endl;
++                cerr << "get_alt_blocks: not connected to daemon" << endl;
+                 return false;
+             }
+ 
+@@ -156,15 +156,15 @@ public:
+ 
+             if (!err.empty())
+             {
+-                cerr << "Error connecting to Monero deamon due to "
++                cerr << "Error connecting to Haven daemon due to "
+                      << err << endl;
+                 return false;
+             }
+         }
+         else
+         {
+-            cerr << "Error connecting to Monero deamon at "
+-                 << deamon_url << endl;
++            cerr << "Error connecting to Haven daemon at "
++                 << daemon_url << endl;
+             return false;
+         }
+ 
+diff --git a/src/templates/address.html b/src/templates/address.html
+index 5e3f157..7a58b11 100644
+--- a/src/templates/address.html
++++ b/src/templates/address.html
+@@ -28,7 +28,7 @@
+ 
+     <H4 style="margin:5px">
+         Transactions:<br/> Sorry, its not possible to find txs associated with
+-        normal addresses in Monero
++        normal addresses in Haven
+     </H4>
+ 
+     <br/>
+diff --git a/src/templates/checkrawoutputkeys.html b/src/templates/checkrawoutputkeys.html
+index 572bbdc..107dc1d 100644
+--- a/src/templates/checkrawoutputkeys.html
++++ b/src/templates/checkrawoutputkeys.html
+@@ -15,7 +15,7 @@
+         <h4>Output keys for address: {{address}}</h4>
+         <h4>Viewkey: {{viewkey}}</h4>
+         {{#has_total_xmr}}
+-            <h4>Total xmr: {{total_xmr}}</h4>
++            <h4>Total XHV: {{total_xmr}}</h4>
+         {{/has_total_xmr}}
+ 
+         <div class="center">
+@@ -60,4 +60,4 @@
+ 
+     {{/has_error}}
+ 
+-</div>
+\ No newline at end of file
++</div>
+diff --git a/src/templates/footer.html b/src/templates/footer.html
+index 4e0cbe6..b0a890f 100644
+--- a/src/templates/footer.html
++++ b/src/templates/footer.html
+@@ -1,8 +1,8 @@
+ <div class="center">
+     <h6 style="margin-top:10px">
+-        <a href="https://github.com/moneroexamples/onion-monero-blockchain-explorer">source code</a>
++        <a href="https://github.com/haven-protocol-org/haven-block-explorer">source code</a>
+         | explorer version (api): {{git_branch_name}}-{{last_git_commit_date}}-{{last_git_commit_hash}} ({{api}})
+-        | monero version: {{monero_version_full}}
++        | Haven version: {{monero_version_full}}
+     </h6>
+ </div>
+ </body>
+diff --git a/src/templates/header.html b/src/templates/header.html
+index 7c53e54..bc56611 100644
+--- a/src/templates/header.html
++++ b/src/templates/header.html
+@@ -6,7 +6,7 @@
+     {{#refresh}}
+         <meta http-equiv="refresh" content="10">
+     {{/refresh}}
+-    <title>Onion Monero Blockchain Explorer</title>
++    <title>Haven Blockchain Explorer</title>
+     <!--<link rel="stylesheet" type="text/css" href="/css/style.css">-->
+     <style type="text/css">
+         {{#css_styles}}{{/css_styles}}
+@@ -19,7 +19,7 @@
+ <div>
+ 
+     <div class="center">
+-        <h1 class="center"><a href="/">Onion Monero Blockchain Explorer</a></h1>
++        <h1 class="center"><a href="/">Haven Blockchain Explorer</a></h1>
+         <h4 style="font-size: 15px; margin: 0px">({{^enable_js}}no javascript - {{/enable_js}}no cookies - no web analytics trackers - no images - open sourced)</h4>
+     </div>
+ 
+diff --git a/src/templates/index2.html b/src/templates/index2.html
+index 8e6f96c..1e96fcf 100644
+--- a/src/templates/index2.html
++++ b/src/templates/index2.html
+@@ -55,7 +55,7 @@
+ 
+     {{#emission}}
+         <h3 style="font-size: 12px; margin-top: 2px">
+-            Monero emission (fees) is {{amount}} ({{fee_amount}}) as of {{blk_no}} block
++            Haven emission (fees) is {{amount}} ({{fee_amount}}) as of {{blk_no}} block
+         </h3>
+     {{/emission}}
+ 
+diff --git a/src/templates/js/config.js b/src/templates/js/config.js
+index 09aaf1c..432d038 100755
+--- a/src/templates/js/config.js
++++ b/src/templates/js/config.js
+@@ -4,23 +4,23 @@ var config = {
+     coinUnitPlaces: 12,
+     txMinConfirms: 10,         // corresponds to CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE in Monero
+     txCoinbaseMinConfirms: 60, // corresponds to CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW in Monero
+-    coinSymbol: 'XMR',
+-    openAliasPrefix: "xmr",
+-    coinName: 'Monero',
+-    coinUriPrefix: 'monero:',
+-    addressPrefix: 18,
+-    integratedAddressPrefix: 19,
+-    subAddressPrefix: 42,
+-    addressPrefixTestnet: 53,
+-    integratedAddressPrefixTestnet: 54,
+-    subAddressPrefixTestnet: 63,
++    coinSymbol: 'XHV',
++    openAliasPrefix: "xhv",
++    coinName: 'Haven',
++    coinUriPrefix: 'haven:',
++    addressPrefix: 0x5af4, // hvx
++    integratedAddressPrefix: 0xcd774, // hvi
++    subAddressPrefix: 0x12d974, // hvs
++    addressPrefixTestnet: 0x59f4, // hvt
++    integratedAddressPrefixTestnet: 0x499f4, // hvti
++    subAddressPrefixTestnet: 0x919f4, // hvts
+     addressPrefixStagenet: 24,
+     integratedAddressPrefixStagenet: 25,
+     subAddressPrefixStagenet: 36,
+     feePerKB: new JSBigInt('2000000000'),//20^10 - for testnet its not used, as fee is dynamic.
+     dustThreshold: new JSBigInt('1000000000'),//10^10 used for choosing outputs/change - we decompose all the way down if the receiver wants now regardless of threshold
+     txChargeRatio: 0.5,
+-    defaultMixin: 4, // minimum mixin for hardfork v5
++    defaultMixin: 10, // minimum mixin for hardfork v5
+     txChargeAddress: '',
+     idleTimeout: 30,
+     idleWarningDuration: 20,
+diff --git a/src/templates/my_outputs.html b/src/templates/my_outputs.html
+index 41c399a..d0c6006 100644
+--- a/src/templates/my_outputs.html
++++ b/src/templates/my_outputs.html
+@@ -69,7 +69,7 @@
+         </table>
+ 
+         <h3>
+-            Sum XMR from matched outputs (i.e., incoming XMR):
++            Sum XHV from matched outputs (i.e., incoming XHV):
+             {{#found_our_outputs}}
+                 {{sum_xmr}}
+             {{/found_our_outputs}}
+@@ -142,7 +142,7 @@
+ 
+         </div>
+         <h3>
+-            Sum XMR from matched and marked by * ring member's outputs: {{sum_mixin_xmr}}
++            Sum XHV from matched and marked by * ring member's outputs: {{sum_mixin_xmr}}
+             <br/>
+             <span style="font-size: 16px"> Possible spending is:
+                 {{possible_spending}} (tx fee included)
+@@ -155,7 +155,7 @@
+                <br/>
+                <span style="font-size: 14px">
+                  Number of possible our mixins is {{no_all_possible_mixins}}
+-                      for {{all_possible_mixins_amount}} xmr
++                      for {{all_possible_mixins_amount}} XHV
+                       (amount as uint64).
+                </span>
+         </h3>
+diff --git a/src/templates/partials/tx_details.html b/src/templates/partials/tx_details.html
+index bd4459a..bca5a61 100644
+--- a/src/templates/partials/tx_details.html
++++ b/src/templates/partials/tx_details.html
+@@ -56,7 +56,7 @@
+     </table>
+ 
+ 
+-  <h3>{{outputs_no}} output(s) for total of {{outputs_xmr_sum}} xmr</h3>
++  <h3>{{outputs_no}} output(s) for total of {{outputs_xmr_sum}} XHV</h3>
+   <div class="center">
+       <table class="center">
+           <tr>
+@@ -82,7 +82,7 @@
+                 <input type="radio" id="tab-1" name="tab-group-1" checked>
+                 <label for="tab-1">Decode outputs</label>
+                 <div class="content">
+-                    <h4 style="margin: 0px">Check which outputs belong to given Monero address/subaddress and viewkey</h4>
++                    <h4 style="margin: 0px">Check which outputs belong to given Haven address/subaddress and viewkey</h4>
+                     <h5 style="margin: 0px">
+                         For RingCT transactions, outputs' amounts are also decoded
+                         <br/>
+@@ -95,7 +95,7 @@
+                     </h5>
+                     <form action="/myoutputs" method="post" style="width:100%; margin-top:2px" class="style-1">
+                         <input type="hidden" name="tx_hash" value="{{tx_hash}}"><br/>
+-                        <input type="text" name="xmr_address" size="110" placeholder="Monero address/subaddress"><br/>
++                        <input type="text" name="xmr_address" size="110" placeholder="Haven address/subaddress"><br/>
+                         <input type="text" name="viewkey" size="110" placeholder="Private viewkey" style="margin-top:5px"><br/>
+                         <input type="hidden" name="raw_tx_data" value="{{raw_tx_data}}">
+                         <!--above raw_tx_data field only used when checking raw tx data through tx pusher-->
+@@ -117,7 +117,7 @@
+                 <label for="tab-2">Prove sending</label>
+ 
+                 <div class="content">
+-                    <h4 style="margin: 0px">Prove to someone that you have sent them Monero in this transaction</h4>
++                    <h4 style="margin: 0px">Prove to someone that you have sent them Haven in this transaction</h4>
+                     <h5 style="margin: 0px">
+                         Tx private key can be obtained using <i>get_tx_key</i>
+                         command in  <i>monero-wallet-cli</i> command line tool
+@@ -134,7 +134,7 @@
+                        <input type="text" name="txprvkey" size="120" placeholder="Tx private key"><br/>
+                         <input type="hidden" name="raw_tx_data" value="{{raw_tx_data}}">
+                         <!--above raw_tx_data field only used when checking raw tx data through tx pusher-->
+-                       <input type="text" name="xmraddress" size="120" placeholder="Recipient's monero address/subaddress" style="margin-top:5px"><br/>
++                       <input type="text" name="xmraddress" size="120" placeholder="Recipient's Haven address/subaddress" style="margin-top:5px"><br/>
+ 
+                         {{#enable_js}}
+                             <!-- if have js, DONOT submit the form to server.
+@@ -356,7 +356,7 @@
+ 
+                 decoding_results_str += "</table>";
+ 
+-                decoding_results_str += "<h3>Sum XMR from matched outputs (i.e., incoming XMR): " + (sum_outptus / 1e12) + "</h3>"
++                decoding_results_str += "<h3>Sum XHV from matched outputs (i.e., incoming XHV): " + (sum_outptus / 1e12) + "</h3>"
+ 
+ 
+                 // decrypt payment_id8 which results in using
+@@ -397,14 +397,14 @@
+     {{/enable_mixins_details}}
+ 
+     {{^inputs_xmr_sum_not_zero}}
+-        <h3>{{inputs_no}} input(s) for total of {{inputs_xmr_sum}} xmr</h3>
++        <h3>{{inputs_no}} input(s) for total of {{inputs_xmr_sum}} XHV</h3>
+     {{/inputs_xmr_sum_not_zero}}
+     {{#inputs_xmr_sum_not_zero}}
+         {{^have_any_unknown_amount}}
+-            <h3>{{inputs_no}} inputs(s) for total of {{inputs_xmr_sum}} xmr</h3>
++            <h3>{{inputs_no}} inputs(s) for total of {{inputs_xmr_sum}} XHV</h3>
+         {{/have_any_unknown_amount}}
+         {{#have_any_unknown_amount}}
+-            <h3>{{inputs_no}} inputs(s) for total of at least {{inputs_xmr_sum}} xmr</h3>
++            <h3>{{inputs_no}} inputs(s) for total of at least {{inputs_xmr_sum}} XHV</h3>
+         {{/have_any_unknown_amount}}
+     {{/inputs_xmr_sum_not_zero}}
+ 
+diff --git a/src/templates/rawtx.html b/src/templates/rawtx.html
+index 6419c9f..af5e312 100644
+--- a/src/templates/rawtx.html
++++ b/src/templates/rawtx.html
+@@ -9,12 +9,12 @@
+     <div class="center">
+         <form action="/checkandpush" method="post" style="width:100%; margin-top:15px" class="style-1">
+             Paste here either a hex string of raw transaction<br/>
+-            (the <i>tx_blob</i> response in the wallet RPC, or the <i>raw_monero_tx</i>
++            (the <i>tx_blob</i> response in the wallet RPC, or the <i>raw_haven_tx</i>
+             file saved by the wallet CLI with <i>--do-not-relay</i> option specified),<br/>
+             or base64 encoded, unsigned or signed transaction data<br/>
+             <br/>
+-            (In Linux, can get the raw tx data: <i>cat raw_monero_tx | xclip -selection clipboard</i>)<br/>
+-            (In Windows, can get the raw tx data: <i>certutil.exe -encode -f raw_monero_tx encoded.txt & type "encoded.txt" | clip</i>)<br/>
++            (In Linux, can get the raw tx data: <i>cat raw_haven_tx | xclip -selection clipboard</i>)<br/>
++            (In Windows, can get the raw tx data: <i>certutil.exe -encode -f raw_haven_tx encoded.txt & type "encoded.txt" | clip</i>)<br/>
+ 
+             <textarea name="rawtxdata" rows="20" cols="80"></textarea>
+             <br/>
+diff --git a/src/tools.cpp b/src/tools.cpp
+index d3b1513..3755f05 100644
+--- a/src/tools.cpp
++++ b/src/tools.cpp
+@@ -239,8 +239,8 @@ generate_key_image(const crypto::key_derivation& derivation,
+ string
+ get_default_lmdb_folder(cryptonote::network_type nettype)
+ {
+-    // default path to monero folder
+-    // on linux this is /home/<username>/.bitmonero
++    // default path to haven folder
++    // on linux this is /home/<username>/.haven
+     string default_monero_dir = tools::get_default_data_dir();
+ 
+     if (nettype == cryptonote::network_type::TESTNET)
+@@ -1047,10 +1047,10 @@ decrypt(const std::string &ciphertext,
+         return {};
+     }
+ 
+-    crypto::chacha_key key;
+-    crypto::generate_chacha_key(&skey, sizeof(skey), key, 1);
++    crypto::chacha8_key key;
++    crypto::generate_chacha8_key(&skey, sizeof(skey), key/*, 1*/);
+ 
+-    const crypto::chacha_iv &iv = *(const crypto::chacha_iv*)&ciphertext[0];
++    const crypto::chacha8_iv &iv = *(const crypto::chacha8_iv*)&ciphertext[0];
+ 
+     std::string plaintext;
+ 

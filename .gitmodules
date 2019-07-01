@@ -1,3 +1,6 @@
 [submodule "monero"]
 	path = monero
 	url = https://github.com/monero-project/monero
+[submodule "onion-monero-blockchain-explorer"]
+	path = onion-monero-blockchain-explorer
+	url = https://github.com/moneroexamples/onion-monero-blockchain-explorer.git
