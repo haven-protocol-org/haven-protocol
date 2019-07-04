@@ -245,6 +245,24 @@
  }
  //------------------------------------------------------------------
  // This function does a sanity check on basic things that all miner
+@@ -1228,7 +1208,7 @@
+   for (auto& o: b.miner_tx.vout)
+     money_in_use += o.amount;
+   partial_block_reward = false;
+-
++  /*
+   if (version == 3) {
+     for (auto &o: b.miner_tx.vout) {
+       if (!is_valid_decomposed_amount(o.amount)) {
+@@ -1237,7 +1217,7 @@
+       }
+     }
+   }
+-
++  */
+   std::vector<uint64_t> last_blocks_weights;
+   get_last_n_blocks_weights(last_blocks_weights, CRYPTONOTE_REWARD_BLOCKS_WINDOW);
+   if (!get_block_reward(epee::misc_utils::median(last_blocks_weights), cumulative_block_weight, already_generated_coins, base_reward, version))
 @@ -1245,6 +1179,42 @@
      MERROR_VER("block weight " << cumulative_block_weight << " is bigger than allowed for this blockchain");
      return false;
@@ -306,15 +324,6 @@
  
      CHECK_AND_ASSERT_MES(r, false, "Failed to construct miner tx, second chance");
      size_t coinbase_weight = get_transaction_weight(b.miner_tx);
-@@ -1742,7 +1616,7 @@
-     difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);
-     CHECK_AND_ASSERT_MES(current_diff, false, "!!!!!!! DIFFICULTY OVERHEAD !!!!!!!");
-     crypto::hash proof_of_work = null_hash;
--    get_block_longhash(bei.bl, proof_of_work, bei.height);
-+    get_block_longhash(bei.bl, m_pow_ctx, proof_of_work);
-     if(!check_hash(proof_of_work, current_diff))
-     {
-       MERROR_VER("Block with id: " << id << std::endl << " for alternative chain, does not have enough proof of work: " << proof_of_work << std::endl << " expected difficulty: " << current_diff);
 @@ -2016,14 +1893,14 @@
  //------------------------------------------------------------------
  bool Blockchain::get_output_distribution(uint64_t amount, uint64_t from_height, uint64_t to_height, uint64_t &start_height, std::vector<uint64_t> &distribution, uint64_t &base) const
@@ -402,10 +411,19 @@
      size_t n_unmixable = 0, n_mixable = 0;
      size_t mixin = std::numeric_limits<size_t>::max();
 -    const size_t min_mixin = hf_version >= HF_VERSION_MIN_MIXIN_10 ? 10 : hf_version >= HF_VERSION_MIN_MIXIN_6 ? 6 : hf_version >= HF_VERSION_MIN_MIXIN_4 ? 4 : 2;
-+    const size_t min_mixin = hf_version >= HF_2_MIN_MIXIN_10 ? 10 : 4;
++    const size_t min_mixin = hf_version >= HF_2_MIN_MIXIN_10 ? 9 : 4;
      for (const auto& txin : tx.vin)
      {
        // non txin_to_key inputs will be rejected below
+@@ -2862,7 +2879,7 @@
+     }
+
+     // min/max tx version based on HF, and we accept v1 txes if having a non mixable
+-    const size_t max_tx_version = (hf_version <= 3) ? 1 : 2;
++    const size_t max_tx_version = 2;
+     if (tx.version > max_tx_version)
+     {
+       MERROR_VER("transaction version " << (unsigned)tx.version << " is higher than max accepted version " << max_tx_version);
 @@ -3162,16 +3036,16 @@
        return false;
      }
@@ -426,27 +444,8 @@
              return false;
            }
          }
-@@ -3643,12 +3507,12 @@
-       proof_of_work = it->second;
-     }
-     else
--      proof_of_work = get_block_longhash(bl, blockchain_height);
-+      get_block_longhash(bl, m_pow_ctx, proof_of_work);
- 
-     // validate proof_of_work versus difficulty target
-     if(!check_hash(proof_of_work, current_diffic))
-     {
--      MERROR_VER("Block with id: " << id << std::endl << "does not have enough proof of work: " << proof_of_work << " at height " << blockchain_height << ", unexpected difficulty: " << current_diffic);
-+      MERROR_VER("Block with id: " << id << std::endl << "does not have enough proof of work: " << proof_of_work << std::endl << "unexpected difficulty: " << current_diffic);
-       bvc.m_verifivation_failed = true;
-       goto leave;
-     }
-@@ -4136,21 +3910,20 @@
- }
- 
- //------------------------------------------------------------------
--void Blockchain::block_longhash_worker(uint64_t height, const epee::span<const block> &blocks, std::unordered_map<crypto::hash, crypto::hash> &map) const
-+void Blockchain::block_longhash_worker(cn_pow_hash_v3& hash_ctx, const epee::span<const block> &blocks, std::unordered_map<crypto::hash, crypto::hash> &map)
+@@ -4139,18 +3910,16 @@
+ void Blockchain::block_longhash_worker(uint64_t height, const epee::span<const block> &blocks, std::unordered_map<crypto::hash, crypto::hash> &map) const
  {
    TIME_MEASURE_START(t);
 -  slow_hash_allocate_state();
@@ -456,31 +455,13 @@
      if (m_cancel)
         break;
      crypto::hash id = get_block_hash(block);
--    crypto::hash pow = get_block_longhash(block, height++);
-+    crypto::hash pow;
-+    get_block_longhash(block, hash_ctx, pow);
+     crypto::hash pow = get_block_longhash(block, height++);
      map.emplace(id, pow);
    }
  
 -  slow_hash_free_state();
    TIME_MEASURE_FINISH(t);
  }
- 
-@@ -4463,12 +4229,14 @@
-       m_blocks_longhash_table.clear();
-       uint64_t thread_height = height;
-       tools::threadpool::waiter waiter;
-+      if(m_hash_ctxes_multi.size() < threads)
-+        m_hash_ctxes_multi.resize(threads);
-       for (unsigned int i = 0; i < threads; i++)
-       {
-         unsigned nblocks = batches;
-         if (i < extra)
-           ++nblocks;
--        tpool.submit(&waiter, boost::bind(&Blockchain::block_longhash_worker, this, thread_height, epee::span<const block>(&blocks[thread_height - height], nblocks), std::ref(maps[i])), true);
-+        tpool.submit(&waiter, boost::bind(&Blockchain::block_longhash_worker, this, std::ref(m_hash_ctxes_multi[i]), epee::span<const block>(&blocks[thread_height - height], nblocks), std::ref(maps[i])));
-         thread_height += nblocks;
-       }
  
 @@ -4845,7 +4618,7 @@
  }

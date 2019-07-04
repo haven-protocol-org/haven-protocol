@@ -249,7 +249,7 @@
 -  if (use_fork_rules(2, 10))
 -    return 3;
 -  return 0;
-+    return 10;
++    return 11;
  }
  //------------------------------------------------------------------------------------------------------------------------------
  uint64_t wallet2::get_max_ring_size() const
@@ -294,33 +294,6 @@
  {
    if (!m_ringdb)
      return false;
-@@ -9172,7 +8802,7 @@
-   uint64_t needed_fee, available_for_fee = 0;
-   uint64_t upper_transaction_weight_limit = get_upper_transaction_weight_limit();
-   const bool use_per_byte_fee = use_fork_rules(HF_VERSION_PER_BYTE_FEE, 0);
--  const bool use_rct = use_fork_rules(4, 0);
-+  const bool use_rct = true;
-   const bool bulletproof = use_fork_rules(get_bulletproof_fork(), 0);
-   const rct::RCTConfig rct_config {
-     bulletproof ? rct::RangeProofPaddedBulletproof : rct::RangeProofBorromean,
-@@ -9779,7 +9337,7 @@
- {
-   std::vector<size_t> unused_transfers_indices;
-   std::vector<size_t> unused_dust_indices;
--  const bool use_rct = use_fork_rules(4, 0);
-+  const bool use_rct = true;
-   // find output with the given key image
-   for (size_t i = 0; i < m_transfers.size(); ++i)
-   {
-@@ -9821,7 +9379,7 @@
-   std::vector<std::vector<get_outs_entry>> outs;
- 
-   const bool use_per_byte_fee = use_fork_rules(HF_VERSION_PER_BYTE_FEE);
--  const bool use_rct = fake_outs_count > 0 && use_fork_rules(4, 0);
-+  const bool use_rct = fake_outs_count > 0;
-   const bool bulletproof = use_fork_rules(get_bulletproof_fork(), 0);
-   const rct::RCTConfig rct_config {
-     bulletproof ? rct::RangeProofPaddedBulletproof : rct::RangeProofBorromean,
 @@ -12541,10 +11940,10 @@
  //----------------------------------------------------------------------------------------------------
  std::string wallet2::encrypt(const char *plaintext, size_t len, const crypto::secret_key &skey, bool authenticated) const
@@ -353,3 +326,12 @@
    if (authenticated)
    {
      crypto::hash hash;
+@@ -12968,7 +12968,7 @@
+ }
+ //----------------------------------------------------------------------------------------------------
+ void wallet2::generate_genesis(cryptonote::block& b) const {
+-  cryptonote::generate_genesis_block(b, get_config(m_nettype).GENESIS_TX, get_config(m_nettype).GENESIS_NONCE);
++  cryptonote::generate_genesis_block(b, get_config(m_nettype).GENESIS_TX, get_config(m_nettype).GENESIS_NONCE, (m_nettype == TESTNET));
+ }
+ //----------------------------------------------------------------------------------------------------
+ mms::multisig_wallet_state wallet2::get_multisig_wallet_state() const
