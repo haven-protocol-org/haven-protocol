@@ -1,0 +1,35 @@
+@@ -4,23 +4,23 @@ var config = {
+     coinUnitPlaces: 12,
+     txMinConfirms: 10,         // corresponds to CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE in Monero
+     txCoinbaseMinConfirms: 60, // corresponds to CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW in Monero
+-    coinSymbol: 'XMR',
+-    openAliasPrefix: "xmr",
+-    coinName: 'Monero',
+-    coinUriPrefix: 'monero:',
+-    addressPrefix: 18,
+-    integratedAddressPrefix: 19,
+-    subAddressPrefix: 42,
+-    addressPrefixTestnet: 53,
+-    integratedAddressPrefixTestnet: 54,
+-    subAddressPrefixTestnet: 63,
++    coinSymbol: 'XHV',
++    openAliasPrefix: "xhv",
++    coinName: 'Haven',
++    coinUriPrefix: 'haven:',
++    addressPrefix: 0x5af4, // hvx
++    integratedAddressPrefix: 0xcd774, // hvi
++    subAddressPrefix: 0x12d974, // hvs
++    addressPrefixTestnet: 0x59f4, // hvt
++    integratedAddressPrefixTestnet: 0x499f4, // hvti
++    subAddressPrefixTestnet: 0x919f4, // hvts
+     addressPrefixStagenet: 24,
+     integratedAddressPrefixStagenet: 25,
+     subAddressPrefixStagenet: 36,
+     feePerKB: new JSBigInt('2000000000'),//20^10 - for testnet its not used, as fee is dynamic.
+     dustThreshold: new JSBigInt('1000000000'),//10^10 used for choosing outputs/change - we decompose all the way down if the receiver wants now regardless of threshold
+     txChargeRatio: 0.5,
+-    defaultMixin: 4, // minimum mixin for hardfork v5
++    defaultMixin: 10, // minimum mixin for hardfork v5
+     txChargeAddress: '',
+     idleTimeout: 30,
+     idleWarningDuration: 20,

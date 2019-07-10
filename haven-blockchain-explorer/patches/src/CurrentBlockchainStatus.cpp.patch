@@ -1,0 +1,34 @@
+@@ -32,7 +32,7 @@ CurrentBlockchainStatus::start_monitor_blockchain_thread()
+     {
+         if (!load_current_emission_amount())
+         {
+-            cerr << "Emission file cant be read, got corrupted or has incorrect format:\n " << emmision_saved_file
++            cerr << "Emission file can't be read, got corrupted or has incorrect format:\n " << emmision_saved_file
+                  << "\nEmission monitoring thread is not started.\nDelete the file and"
+                  << " restart the explorer or disable emission monitoring."
+                  << endl;
+@@ -205,7 +205,7 @@ CurrentBlockchainStatus::load_current_emission_amount()
+ 
+     if (strs.empty())
+     {
+-        cerr << "Problem spliting string values form  emission_amount." << endl;
++        cerr << "Problem spliting string values from emission_amount." << endl;
+         return false;
+     }
+ 
+@@ -297,13 +297,13 @@ CurrentBlockchainStatus::is_thread_running()
+    return is_running;
+ }
+ 
+-bf::path CurrentBlockchainStatus::blockchain_path {"/home/mwo/.bitmonero/lmdb"};
++bf::path CurrentBlockchainStatus::blockchain_path {"~/.haven/lmdb"};
+ 
+ cryptonote::network_type CurrentBlockchainStatus::nettype {cryptonote::network_type::MAINNET};
+ 
+ string CurrentBlockchainStatus::output_file {"emission_amount.txt"};
+ 
+-string CurrentBlockchainStatus::deamon_url {"http:://127.0.0.1:18081"};
++string CurrentBlockchainStatus::daemon_url {"http:://127.0.0.1:17750"};
+ 
+ uint64_t  CurrentBlockchainStatus::blockchain_chunk_size {10000};
+ 

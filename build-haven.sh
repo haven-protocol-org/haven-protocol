@@ -15,7 +15,9 @@ git reset HEAD --hard
 popd
 
 # Apply patches / whole files to the monero codebase
+echo "Applying patches to Monero codebase:"
 find src -type f | while read line ; do
+    echo -n -e "\t"
     if [[ $line =~ ".git/" ]]; then
         continue
     elif [[ $line =~ "^README.md$" ]]; then

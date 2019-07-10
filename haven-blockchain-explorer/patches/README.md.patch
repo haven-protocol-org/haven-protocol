@@ -1,0 +1,13 @@
+--- a/README.md
++++ b/README.md
+@@ -203,8 +203,8 @@ xmrblocks, Onion Monero Blockchain Explorer:
+                                         functionality
+   --ssl-key-file arg                    path to key file for ssl (https)
+                                         functionality
+-  -d [ --deamon-url ] arg (=http:://127.0.0.1:18081)
+-                                        Monero deamon url
++  -d [ --daemon-url ] arg (=http:://127.0.0.1:18081)
++                                        Haven daemon url
+ ```
+ 
+ Example usage, defined as bash aliases.
