@@ -18,7 +18,7 @@
    {
      uint64_t last_height = m_height-1;
      MDB_val_set(h, last_height);
-@@ -4936,293 +4773,6 @@
+@@ -4985,293 +4773,6 @@
    txn.commit();
  }
  
@@ -312,7 +312,7 @@
  void BlockchainLMDB::migrate(const uint32_t oldversion)
  {
    if (oldversion < 1)
-@@ -5231,10 +4781,6 @@
+@@ -5280,10 +4781,6 @@
      migrate_1_2();
    if (oldversion < 3)
      migrate_2_3();

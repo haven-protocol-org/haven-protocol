@@ -10,7 +10,7 @@ fi
 
 # Reset monero code to HEAD
 pushd monero
-git checkout -b v0.14.1.0
+git checkout -b master
 git reset HEAD --hard
 popd
 

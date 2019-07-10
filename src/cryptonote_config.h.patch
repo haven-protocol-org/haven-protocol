@@ -92,7 +92,7 @@
  #define CRYPTONOTE_POOLDATA_FILENAME            "poolstate.bin"
  #define CRYPTONOTE_BLOCKCHAINDATA_FILENAME      "data.mdb"
  #define CRYPTONOTE_BLOCKCHAINDATA_LOCK_FILENAME "lock.mdb"
-@@ -139,14 +140,15 @@
+@@ -139,14 +140,16 @@
  
  #define THREAD_STACK_SIZE                       5 * 1024 * 1024
  
@@ -113,6 +113,7 @@
 +#define HF_VERSION_PER_BYTE_FEE                 5
 +#define HF_VERSION_SMALLER_BP                   5
 +#define HF_VERSION_LONG_TERM_BLOCK_WEIGHT       6
++#define HF_11_MIN_MIXIN_10                      11
  
  #define PER_KB_FEE_QUANTIZATION_DECIMALS        8
  
