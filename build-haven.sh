@@ -9,10 +9,10 @@ if [ ! -d "monero" ] || [ ! -e "monero/.git" ]; then
 fi
 
 # Reset monero code to HEAD
-pushd monero
+pushd monero > /dev/null 2>&1
 git checkout -b master
 git reset HEAD --hard
-popd
+popd > /dev/null 2>&1
 
 # Apply patches / whole files to the monero codebase
 echo "Applying patches to Monero codebase:"
@@ -35,3 +35,12 @@ find src -type f | while read line ; do
         cp $line $dstfilename
     fi
 done
+
+export USE_SINGLE_BUILDDIR=1
+
+echo "Compiling patched monero code..."
+pushd monero > /dev/null 2>&1
+make release
+
+popd > /dev/null 2>&1
+echo "Done."
