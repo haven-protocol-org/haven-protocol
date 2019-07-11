@@ -1,12 +1,28 @@
-# haven-patches
+haven-patches
+=============
 
 This repository is a test-bed to attempt to perform a full rebase of the latest monero code
 (currently v0.14.1.0) using a series of patch files.
 
-To build haven, simply run the following commands:
+To build haven, simply run the following command(s):
 
 1. ./build-haven.sh
-2. cd monero
-3. make clean-all
-4. make release
 
+To build the blockchain explorer, you need to build haven first (see above). Once that is
+done, you should run the following commands:
+
+1. cd haven-blockchain-explorer
+2. ./build-blockchain-explorer.sh
+
+Parallel compilation
+--------------------
+If you wish to use multiple CPU cores to compile quicker (i.e. the "-jN" option), simply
+set the appropriate flags in the MAKEFLAGS environment variable before running the
+build scripts, e.g.
+
+$ export MAKEFLAGS='-j8'
+$ ./build-haven.sh
+
+or more simply
+
+$ MAKEFLAGS='-j8' ./build-haven.sh
