@@ -40,7 +40,7 @@ export USE_SINGLE_BUILDDIR=1
 
 echo "Compiling patched monero code..."
 pushd monero > /dev/null 2>&1
-make release
+make $1
 
 popd > /dev/null 2>&1
 echo "Done."
