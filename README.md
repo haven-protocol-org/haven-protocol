@@ -6,14 +6,14 @@ This repository is a test-bed to attempt to perform a full rebase of the latest 
  
 To build haven, simply run the following command(s):
  
-`$ ./build-haven.sh _<buildtype>_`
+`$ ./build-haven.sh _<buildtype>_`  
  
 where _<buildtype>_ is the standard **make** option (e.g. "release")
  
 To build the blockchain explorer, you need to build haven first (see above). Once that is
 done, you should run the following commands:
  
-`$ cd haven-blockchain-explorer
+`$ cd haven-blockchain-explorer  
 $ ./build-blockchain-explorer.sh`
  
 Parallel compilation
