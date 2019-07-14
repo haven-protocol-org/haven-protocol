@@ -36,11 +36,15 @@ find src -type f | while read line ; do
     fi
 done
 
+# Write out the Haven version information
+HAVENVER=`git rev-parse --short HEAD`
+sed -i -e "s/@HAVENTAG@/$HAVENVER/g" monero/src/version.cpp.in
+
 export USE_SINGLE_BUILDDIR=1
 
 echo "Compiling patched monero code..."
 pushd monero > /dev/null 2>&1
-make $1
+make $@
 
 popd > /dev/null 2>&1
 echo "Done."
