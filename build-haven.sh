@@ -12,6 +12,7 @@ fi
 pushd monero > /dev/null 2>&1
 git checkout -b master
 git reset HEAD --hard
+git pull -t
 popd > /dev/null 2>&1
 
 # Apply patches / whole files to the monero codebase
@@ -36,11 +37,15 @@ find src -type f | while read line ; do
     fi
 done
 
+# Write out the Haven version information
+HAVENVER=`git rev-parse --short HEAD`
+sed -i -e "s/@HAVENTAG@/$HAVENVER/g" monero/src/version.cpp.in
+
 export USE_SINGLE_BUILDDIR=1
 
 echo "Compiling patched monero code..."
 pushd monero > /dev/null 2>&1
-make release
+make $@
 
 popd > /dev/null 2>&1
 echo "Done."
