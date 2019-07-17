@@ -17,15 +17,6 @@
      ++m_threads_active;
      while(!m_stop)
      {
-@@ -566,7 +487,7 @@
- 
-       b.nonce = nonce;
-       crypto::hash h;
--      get_block_longhash(b, h, height);
-+      h = get_block_longhash(b, height);
- 
-       if(check_hash(h, local_diff))
-       {
 @@ -588,7 +509,6 @@
        ++m_hashes;
        ++m_total_hashes;

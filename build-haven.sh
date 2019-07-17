@@ -12,6 +12,7 @@ fi
 pushd monero > /dev/null 2>&1
 git checkout -b master
 git reset HEAD --hard
+git pull -t
 popd > /dev/null 2>&1
 
 # Apply patches / whole files to the monero codebase
