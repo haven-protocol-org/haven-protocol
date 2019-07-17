@@ -42,6 +42,16 @@
  }
  
  uint64_t estimate_fee(bool use_per_byte_fee, bool use_rct, int n_inputs, int mixin, int n_outputs, size_t extra_size, bool bulletproof, uint64_t base_fee, uint64_t fee_multiplier, uint64_t fee_quantization_mask)
+@@ -984,7 +984,8 @@
+   end = rct_offsets.data() + rct_offsets.size() - CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE;
+   num_rct_outputs = *(end - 1);
+   THROW_WALLET_EXCEPTION_IF(num_rct_outputs == 0, error::wallet_internal_error, "No rct outputs");
+-  average_output_time = DIFFICULTY_TARGET_V2 * blocks_to_consider / outputs_to_consider; // this assumes constant target over the whole rct range
++  average_output_time = ((double)DIFFICULTY_TARGET_V2 * blocks_to_consider) / outputs_to_consider; // this assumes constant target over the whole rct range
++  THROW_WALLET_EXCEPTION_IF(average_output_time == 0.0, error::wallet_internal_error, "average_output_time is 0 - FIXME");
+ };
+ 
+ gamma_picker::gamma_picker(const std::vector<uint64_t> &rct_offsets): gamma_picker(rct_offsets, GAMMA_SHAPE, GAMMA_SCALE) {}
 @@ -1340,7 +1156,8 @@
    if (!passphrase.empty())
    {
@@ -52,6 +62,24 @@
      sc_reduce32((unsigned char*)key.data);
      data = encrypt(data, key, true);
    }
+@@ -3321,7 +3321,7 @@
+   cryptonote::COMMAND_RPC_GET_OUTPUT_DISTRIBUTION::response res = AUTO_VAL_INIT(res);
+   req.amounts.push_back(0);
+   req.from_height = 0;
+-  req.cumulative = false;
++  req.cumulative = true;
+   req.binary = true;
+   req.compress = true;
+   m_daemon_rpc_mutex.lock();
+@@ -3352,8 +3352,6 @@
+     MWARNING("Failed to request output distribution: results are not for amount 0");
+     return false;
+   }
+-  for (size_t i = 1; i < res.distributions[0].data.distribution.size(); ++i)
+-    res.distributions[0].data.distribution[i] += res.distributions[0].data.distribution[i-1];
+   start_height = res.distributions[0].data.start_height;
+   distribution = std::move(res.distributions[0].data.distribution);
+   return true;
 @@ -6924,6 +6564,10 @@
  //----------------------------------------------------------------------------------------------------
  uint64_t wallet2::get_base_fee() const
