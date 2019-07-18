@@ -1,6 +1,6 @@
 --- monero/src/cryptonote_protocol/cryptonote_protocol_handler.inl	2019-06-20 21:03:18.738816536 +0100
 +++ haven/src/cryptonote_protocol/cryptonote_protocol_handler.inl	2019-05-30 17:58:17.125592233 +0100
-@@ -2063,7 +1969,7 @@
+@@ -2068,7 +2068,7 @@
      if(m_synchronized.compare_exchange_strong(val_expected, true))
      {
        MGINFO_YELLOW(ENDL << "**********************************************************************" << ENDL
@@ -9,7 +9,7 @@
          << ENDL
          << "Use the \"help\" command to see the list of available commands." << ENDL
          << "**********************************************************************");
-@@ -2393,7 +2393,7 @@
+@@ -2398,7 +2398,7 @@
        MINFO("Target height decreasing from " << previous_target << " to " << target);
        m_core.set_target_blockchain_height(target);
        if (target == 0 && context.m_state > cryptonote_connection_context::state_before_handshake && !m_stopping)
