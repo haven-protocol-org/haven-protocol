@@ -1,0 +1,212 @@
+@@ -8,24 +8,24 @@ namespace xmreg
+ {
+ 
+ 
+-rpccalls::rpccalls(string _deamon_url,
++rpccalls::rpccalls(string _daemon_url,
+          uint64_t _timeout)
+-        : deamon_url {_deamon_url},
++        : daemon_url {_daemon_url},
+           timeout_time {_timeout}
+ {
+-    epee::net_utils::parse_url(deamon_url, url);
++    epee::net_utils::parse_url(daemon_url, url);
+ 
+     port = std::to_string(url.port);
+ 
+     timeout_time_ms = std::chrono::milliseconds {timeout_time};
+ 
+     m_http_client.set_server(
+-            deamon_url,
++            daemon_url,
+             boost::optional<epee::net_utils::http::login>{}, epee::net_utils::ssl_support_t::e_ssl_support_disabled);
+ }
+ 
+ bool
+-rpccalls::connect_to_monero_deamon()
++rpccalls::connect_to_monero_daemon()
+ {
+     //std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+@@ -45,9 +45,9 @@ rpccalls::get_current_height()
+ 
+     std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-    if (!connect_to_monero_deamon())
++    if (!connect_to_monero_daemon())
+     {
+-        cerr << "get_current_height: not connected to deamon" << endl;
++        cerr << "get_current_height: not connected to daemon" << endl;
+         return false;
+     }
+ 
+@@ -57,8 +57,8 @@ rpccalls::get_current_height()
+ 
+     if (!r)
+     {
+-        cerr << "Error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "Error connecting to haven daemon at "
++             << daemon_url << endl;
+         return 0;
+     }
+ 
+@@ -77,9 +77,9 @@ rpccalls::get_mempool(vector<tx_info>& mempool_txs)
+     {
+         std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-        if (!connect_to_monero_deamon())
++        if (!connect_to_monero_daemon())
+         {
+-            cerr << "get_mempool: not connected to deamon" << endl;
++            cerr << "get_mempool: not connected to daemon" << endl;
+             return false;
+         }
+ 
+@@ -90,8 +90,8 @@ rpccalls::get_mempool(vector<tx_info>& mempool_txs)
+ 
+     if (!r || res.status != CORE_RPC_STATUS_OK)
+     {
+-        cerr << "Error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "Error connecting to haven daemon at "
++             << daemon_url << endl;
+         return false;
+     }
+ 
+@@ -124,9 +124,9 @@ rpccalls::commit_tx(tools::wallet2::pending_tx& ptx, string& error_msg)
+ 
+     std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-    if (!connect_to_monero_deamon())
++    if (!connect_to_monero_daemon())
+     {
+-        cerr << "commit_tx: not connected to deamon" << endl;
++        cerr << "commit_tx: not connected to daemon" << endl;
+         return false;
+     }
+ 
+@@ -163,9 +163,9 @@ rpccalls::get_network_info(COMMAND_RPC_GET_INFO::response& response)
+     {
+         std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-        if (!connect_to_monero_deamon())
++        if (!connect_to_monero_daemon())
+         {
+-            cerr << "get_network_info: not connected to deamon" << endl;
++            cerr << "get_network_info: not connected to daemon" << endl;
+             return false;
+         }
+ 
+@@ -189,15 +189,15 @@ rpccalls::get_network_info(COMMAND_RPC_GET_INFO::response& response)
+ 
+         if (!err.empty())
+         {
+-            cerr << "Error connecting to Monero deamon due to "
++            cerr << "Error connecting to haven daemon due to "
+                  << err << endl;
+             return false;
+         }
+     }
+     else
+     {
+-        cerr << "Error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "Error connecting to haven daemon at "
++             << daemon_url << endl;
+         return false;
+     }
+ 
+@@ -223,9 +223,9 @@ rpccalls::get_hardfork_info(COMMAND_RPC_HARD_FORK_INFO::response& response)
+     {
+         std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-        if (!connect_to_monero_deamon())
++        if (!connect_to_monero_daemon())
+         {
+-            cerr << "get_hardfork_info: not connected to deamon" << endl;
++            cerr << "get_hardfork_info: not connected to daemon" << endl;
+             return false;
+         }
+ 
+@@ -250,15 +250,15 @@ rpccalls::get_hardfork_info(COMMAND_RPC_HARD_FORK_INFO::response& response)
+ 
+         if (!err.empty())
+         {
+-            cerr << "Error connecting to Monero deamon due to "
++            cerr << "Error connecting to haven daemon due to "
+                  << err << endl;
+             return false;
+         }
+     }
+     else
+     {
+-        cerr << "Error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "Error connecting to haven daemon at "
++             << daemon_url << endl;
+         return false;
+     }
+ 
+@@ -291,9 +291,9 @@ rpccalls::get_dynamic_per_kb_fee_estimate(
+     {
+         std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-        if (!connect_to_monero_deamon())
++        if (!connect_to_monero_daemon())
+         {
+-            cerr << "get_dynamic_per_kb_fee_estimate: not connected to deamon" << endl;
++            cerr << "get_dynamic_per_kb_fee_estimate: not connected to daemon" << endl;
+             return false;
+         }
+ 
+@@ -318,15 +318,15 @@ rpccalls::get_dynamic_per_kb_fee_estimate(
+ 
+         if (!err.empty())
+         {
+-            cerr << "Error connecting to Monero deamon due to "
++            cerr << "Error connecting to haven daemon due to "
+                  << err << endl;
+             return false;
+         }
+     }
+     else
+     {
+-        cerr << "Error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "Error connecting to haven daemon at "
++             << daemon_url << endl;
+         return false;
+     }
+ 
+@@ -354,9 +354,9 @@ rpccalls::get_block(string const& blk_hash, block& blk, string& error_msg)
+     {
+         std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
+ 
+-        if (!connect_to_monero_deamon())
++        if (!connect_to_monero_daemon())
+         {
+-            cerr << "get_block: not connected to deamon" << endl;
++            cerr << "get_block: not connected to daemon" << endl;
+             return false;
+         }
+ 
+@@ -381,15 +381,15 @@ rpccalls::get_block(string const& blk_hash, block& blk, string& error_msg)
+ 
+         if (!err.empty())
+         {
+-            cerr << "Error connecting to Monero deamon due to "
++            cerr << "Error connecting to haven daemon due to "
+                  << err << endl;
+             return false;
+         }
+     }
+     else
+     {
+-        cerr << "get_block: error connecting to Monero deamon at "
+-             << deamon_url << endl;
++        cerr << "get_block: error connecting to haven daemon at "
++             << daemon_url << endl;
+         return false;
+     }
+ 

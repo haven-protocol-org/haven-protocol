@@ -411,7 +411,7 @@
      size_t n_unmixable = 0, n_mixable = 0;
      size_t mixin = std::numeric_limits<size_t>::max();
 -    const size_t min_mixin = hf_version >= HF_VERSION_MIN_MIXIN_10 ? 10 : hf_version >= HF_VERSION_MIN_MIXIN_6 ? 6 : hf_version >= HF_VERSION_MIN_MIXIN_4 ? 4 : 2;
-+    const size_t min_mixin = hf_version >= HF_2_MIN_MIXIN_10 ? 10 : 4;
++    const size_t min_mixin = hf_version >= HF_11_MIN_MIXIN_10 ? 10 : HF_2_MIN_MIXIN_9 ? 9 : 4;
      for (const auto& txin : tx.vin)
      {
        // non txin_to_key inputs will be rejected below
@@ -467,7 +467,7 @@
  }
  
  #if defined(PER_BLOCK_CHECKPOINT)
--static const char expected_block_hashes_hash[] = "cfca50ea0c87718ac92a14654c60d7ee8f6453e2765b329b40d10da4ed85a4f2";
+-static const char expected_block_hashes_hash[] = "7dafb40b414a0e59bfced6682ef519f0b416bc914dd3d622b72e0dd1a47117c2";
 +static const char expected_block_hashes_hash[] = "e12bc486d6f80148b770198a169dee92ef89498b7b3f40530e0551657825ae1d";
  void Blockchain::load_compiled_in_block_hashes(const GetCheckpointsCallback& get_checkpoints)
  {

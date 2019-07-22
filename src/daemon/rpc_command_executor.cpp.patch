@@ -1,0 +1,15 @@
+--- monero/src/daemon/rpc_command_executor.cpp	2019-06-20 21:03:18.738816536 +0100
++++ haven/src/daemon/rpc_command_executor.cpp	2019-05-30 17:58:17.125592233 +0100
+@@ -1344,10 +1344,10 @@
+   bool daemon_is_alive = m_rpc_client->check_connection();
+ 
+   if(daemon_is_alive) {
+-    tools::success_msg_writer() << "monerod is running";
++    tools::success_msg_writer() << "havend is running";
+   }
+   else {
+-    tools::fail_msg_writer() << "monerod is NOT running";
++    tools::fail_msg_writer() << "havend is NOT running";
+   }
+ 
+   return true;

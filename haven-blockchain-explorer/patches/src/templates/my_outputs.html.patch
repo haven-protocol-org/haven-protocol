@@ -1,0 +1,27 @@
+@@ -69,7 +69,7 @@
+         </table>
+ 
+         <h3>
+-            Sum XMR from matched outputs (i.e., incoming XMR):
++            Sum XHV from matched outputs (i.e., incoming XHV):
+             {{#found_our_outputs}}
+                 {{sum_xmr}}
+             {{/found_our_outputs}}
+@@ -142,7 +142,7 @@
+ 
+         </div>
+         <h3>
+-            Sum XMR from matched and marked by * ring member's outputs: {{sum_mixin_xmr}}
++            Sum XHV from matched and marked by * ring member's outputs: {{sum_mixin_xmr}}
+             <br/>
+             <span style="font-size: 16px"> Possible spending is:
+                 {{possible_spending}} (tx fee included)
+@@ -155,7 +155,7 @@
+                <br/>
+                <span style="font-size: 14px">
+                  Number of possible our mixins is {{no_all_possible_mixins}}
+-                      for {{all_possible_mixins_amount}} xmr
++                      for {{all_possible_mixins_amount}} XHV
+                       (amount as uint64).
+                </span>
+         </h3>

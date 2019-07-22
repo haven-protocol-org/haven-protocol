@@ -1,0 +1,93 @@
+@@ -459,7 +459,7 @@ public:
+ 
+ page(MicroCore* _mcore,
+      Blockchain* _core_storage,
+-     string _deamon_url,
++     string _daemon_url,
+      cryptonote::network_type _nettype,
+      bool _enable_pusher,
+      bool _enable_js,
+@@ -478,7 +478,7 @@ page(MicroCore* _mcore,
+      string _mainnet_url)
+         : mcore {_mcore},
+           core_storage {_core_storage},
+-          rpc {_deamon_url},
++          rpc {_daemon_url},
+           server_timestamp {std::time(nullptr)},
+           nettype {_nettype},
+           enable_pusher {_enable_pusher},
+@@ -603,9 +603,9 @@ index2(uint64_t page_no = 0, bool refresh_page = false)
+ {
+ 
+     // we get network info, such as current hash rate
+-    // but since this makes a rpc call to deamon, we make it as an async
++    // but since this makes a rpc call to daemon, we make it as an async
+     // call. this way we dont have to wait with execution of the rest of the
+-    // index2 method, until deamon gives as the required result.
++    // index2 method, until daemon gives as the required result.
+     std::future<json> network_info_ftr = std::async(std::launch::async, [&]
+     {
+         json j_info;
+@@ -2155,7 +2155,7 @@ show_my_outputs(string tx_hash_str,
+ 
+     if (xmr_address_str.empty())
+     {
+-        return string("Monero address not provided!");
++        return string("Haven address not provided!");
+     }
+ 
+     if (viewkey_str.empty())
+@@ -3949,7 +3949,7 @@ show_checkrawkeyimgs(string raw_data, string viewkey_str)
+     const size_t header_lenght = 2 * sizeof(crypto::public_key);
+     const size_t key_img_size  = sizeof(crypto::key_image);
+     const size_t record_lenght = key_img_size + sizeof(crypto::signature);
+-    const size_t chacha_length = sizeof(crypto::chacha_key);
++    const size_t chacha_length = sizeof(crypto::chacha8_key);
+ 
+     if (decoded_raw_data.size() < header_lenght)
+     {
+@@ -5496,7 +5496,7 @@ json_outputs(string tx_hash_str,
+     if (address_str.empty())
+     {
+         j_response["status"]  = "error";
+-        j_response["message"] = "Monero address not provided";
++        j_response["message"] = "Haven address not provided";
+         return j_response;
+     }
+ 
+@@ -5533,7 +5533,7 @@ json_outputs(string tx_hash_str,
+     if (!xmreg::parse_str_address(address_str,  address_info, nettype))
+     {
+         j_response["status"]  = "error";
+-        j_response["message"] = "Cant parse monero address: " + address_str;
++        j_response["message"] = "Cant parse haven address: " + address_str;
+         return j_response;
+ 
+     }
+@@ -5721,7 +5721,7 @@ json_outputsblocks(string _limit,
+     if (address_str.empty())
+     {
+         j_response["status"]  = "error";
+-        j_response["message"] = "Monero address not provided";
++        j_response["message"] = "Haven address not provided";
+         return j_response;
+     }
+ 
+@@ -5738,7 +5738,7 @@ json_outputsblocks(string _limit,
+     if (!xmreg::parse_str_address(address_str, address_info, nettype))
+     {
+         j_response["status"]  = "error";
+-        j_response["message"] = "Cant parse monero address: " + address_str;
++        j_response["message"] = "Cant parse haven address: " + address_str;
+         return j_response;
+ 
+     }
+@@ -5887,7 +5887,7 @@ json_networkinfo()
+     if (!get_monero_network_info(j_info))
+     {
+         j_response["status"]  = "error";
+-        j_response["message"] = "Cant get monero network info";
++        j_response["message"] = "Cant get haven network info";
+         return j_response;
+     }
+ 
