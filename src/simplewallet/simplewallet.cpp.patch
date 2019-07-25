@@ -76,15 +76,6 @@
    return true;
  }
  
-@@ -2182,7 +2049,7 @@
-   m_wallet->cold_tx_aux_import(exported_txs.ptx, tx_aux);
- 
-   // import key images
--  return m_wallet->import_key_images(exported_txs, 0, true);
-+  return m_wallet->import_key_images(exported_txs.key_images);
- }
- 
- bool simple_wallet::set_always_confirm_transfers(const std::vector<std::string> &args/* = std::vector<std::string>()*/)
 @@ -2254,7 +2121,7 @@
      if (ring_size != 0 && ring_size != DEFAULT_MIX+1)
        message_writer() << tr("WARNING: this is a non default ring size, which may harm your privacy. Default is recommended.");

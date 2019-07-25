@@ -1,0 +1,36 @@
+diff --git a/src/cryptonote_basic/cryptonote_basic.h b/src/cryptonote_basic/cryptonote_basic.h
+index 055c4a22..696c24c3 100644
+--- a/src/cryptonote_basic/cryptonote_basic.h
++++ b/src/cryptonote_basic/cryptonote_basic.h
+@@ -42,6 +42,7 @@
+ #include "serialization/json_archive.h"
+ #include "serialization/debug_archive.h"
+ #include "serialization/crypto.h"
++#include "serialization/pricing_record.h"
+ #include "serialization/keyvalue_serialization.h" // eepe named serialization
+ #include "cryptonote_config.h"
+ #include "crypto/crypto.h"
+@@ -49,6 +50,7 @@
+ #include "misc_language.h"
+ #include "ringct/rctTypes.h"
+ #include "device/device.hpp"
++#include "offshore/offshore_structs.h"
+ 
+ namespace cryptonote
+ {
+@@ -385,6 +387,7 @@ namespace cryptonote
+     uint64_t timestamp;
+     crypto::hash  prev_id;
+     uint32_t nonce;
++    offshore::pricing_record pricing_record;
+ 
+     BEGIN_SERIALIZE()
+       VARINT_FIELD(major_version)
+@@ -392,6 +395,7 @@ namespace cryptonote
+       VARINT_FIELD(timestamp)
+       FIELD(prev_id)
+       FIELD(nonce)
++      FIELD(pricing_record)
+     END_SERIALIZE()
+   };
+ 

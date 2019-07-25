@@ -1,0 +1,10 @@
+--- monero/src/cryptonote_core/CMakeLists.txt	2019-06-20 21:03:18.734816570 +0100
++++ haven/src/cryptonote_core/CMakeLists.txt	2019-05-30 17:58:17.125592233 +0100
+@@ -58,6 +58,7 @@
+     multisig
+     ringct
+     device
++    offshore
+     ${Boost_DATE_TIME_LIBRARY}
+     ${Boost_PROGRAM_OPTIONS_LIBRARY}
+     ${Boost_SERIALIZATION_LIBRARY}

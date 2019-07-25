@@ -1,0 +1,12 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index da6d76d9..955d4fed 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -108,6 +108,7 @@ add_subdirectory(crypto)
+ add_subdirectory(ringct)
+ add_subdirectory(checkpoints)
+ add_subdirectory(cryptonote_basic)
++add_subdirectory(offshore)
+ add_subdirectory(cryptonote_core)
+ add_subdirectory(lmdb)
+ add_subdirectory(multisig)

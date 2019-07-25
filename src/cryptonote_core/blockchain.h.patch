@@ -1,5 +1,13 @@
 --- monero/src/cryptonote_core/blockchain.h	2019-06-20 21:03:18.734816570 +0100
 +++ haven/src/cryptonote_core/blockchain.h	2019-05-30 17:58:17.125592233 +0100
+@@ -57,6 +57,7 @@
+ #include "checkpoints/checkpoints.h"
+ #include "cryptonote_basic/hardfork.h"
+ #include "blockchain_db/blockchain_db.h"
++#include "offshore/pricing_handler.h"
+ 
+ namespace tools { class Notify; }
+ 
 @@ -574,8 +570,8 @@
       * @brief get dynamic per kB or byte fee for a given block weight
       *
@@ -22,3 +30,12 @@
       * This function calculates an estimate for a dynamic fee which will be
       * valid for the next grace_blocks
       *
+@@ -1086,6 +1086,8 @@
+ 
+     HardFork *m_hardfork;
+ 
++    offshore::PricingHandler *m_pricing_handler;
++
+     network_type m_nettype;
+     bool m_offline;
+     difficulty_type m_fixed_difficulty;
