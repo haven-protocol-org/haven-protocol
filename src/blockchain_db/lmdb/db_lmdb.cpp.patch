@@ -1,15 +1,32 @@
 --- monero/src/blockchain_db/lmdb/db_lmdb.cpp	2019-06-20 21:03:18.670817098 +0100
 +++ haven/src/blockchain_db/lmdb/db_lmdb.cpp	2019-05-30 17:58:17.097592512 +0100
-@@ -774,7 +704,7 @@
+@@ -41,6 +41,7 @@
+ #include "crypto/crypto.h"
+ #include "profile_tools.h"
+ #include "ringct/rctOps.h"
++#include "offshore/offshore_structs.h"
+ 
+ #undef MONERO_DEFAULT_LOG_CATEGORY
+ #define MONERO_DEFAULT_LOG_CATEGORY "blockchain.db.lmdb"
+@@ -312,6 +313,7 @@ typedef struct mdb_block_info_4
+   crypto::hash bi_hash;
+   uint64_t bi_cum_rct;
+   uint64_t bi_long_term_block_weight;
++  offshore::pricing_record bi_pricing_record;
+ } mdb_block_info_4;
+ 
+ typedef mdb_block_info_4 mdb_block_info;
+@@ -774,7 +776,8 @@
    bi.bi_diff_lo = (cumulative_difficulty & 0xffffffffffffffff).convert_to<uint64_t>();
    bi.bi_hash = blk_hash;
    bi.bi_cum_rct = num_rct_outs;
 -  if (blk.major_version >= 4)
++  memset(&bi.bi_pricing_record, 0, sizeof(bi.bi_pricing_record));
 +  if (m_height > 0)
    {
      uint64_t last_height = m_height-1;
      MDB_val_set(h, last_height);
-@@ -1461,7 +1461,7 @@
+@@ -1461,7 +1464,7 @@
          mdb_env_close(m_env);
          m_open = false;
          MFATAL("Existing lmdb database needs to be converted, which cannot be done on a read-only database.");
