@@ -26,10 +26,11 @@ index 055c4a22..696c24c3 100644
  
      BEGIN_SERIALIZE()
        VARINT_FIELD(major_version)
-@@ -392,6 +395,7 @@ namespace cryptonote
+@@ -392,6 +395,8 @@ namespace cryptonote
        VARINT_FIELD(timestamp)
        FIELD(prev_id)
        FIELD(nonce)
++    if (major_version>=6)
 +      FIELD(pricing_record)
      END_SERIALIZE()
    };

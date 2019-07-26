@@ -48,6 +48,7 @@ namespace offshore {
     double unused1;
     double unused2;
     double unused3;
+    char signature[32];
   };
 #pragma pack(pop)
 }

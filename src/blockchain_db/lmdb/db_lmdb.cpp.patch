@@ -21,7 +21,7 @@
    bi.bi_hash = blk_hash;
    bi.bi_cum_rct = num_rct_outs;
 -  if (blk.major_version >= 4)
-+  memset(&bi.bi_pricing_record, 0, sizeof(bi.bi_pricing_record));
++  bi.bi_pricing_record = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"\0"};
 +  if (m_height > 0)
    {
      uint64_t last_height = m_height-1;
@@ -35,3 +35,10 @@
          return;
        }
        // Note that there was a schema change within version 0 as well.
+@@ -5227,5 +5230,6 @@ void BlockchainLMDB::migrate_4_5()
+       bi.bi_hash = bi_old->bi_hash;
+       bi.bi_cum_rct = bi_old->bi_cum_rct;
+       bi.bi_long_term_block_weight = bi_old->bi_long_term_block_weight;
++      bi.bi_pricing_record = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"\0"};
+ 
+       MDB_val_set(nv, bi);

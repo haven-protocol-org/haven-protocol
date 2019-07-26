@@ -31,7 +31,7 @@
 namespace offshore {
 
   PricingHandler::PricingHandler()
-    : m_current_record{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+    : m_current_record{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, "\0"}
   {
   }
 
