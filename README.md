@@ -1,8 +1,7 @@
 haven-protocol
 ==============
 
-This repository is a test-bed to attempt to perform a full rebase of the latest monero code
-(currently v0.14.1.0) using a series of patch files.
+This repository is a full rebase of the latest monero code (currently release-v0.14) using a series of patch files.
  
 To build haven, simply run the following command(s):
  
