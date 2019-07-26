@@ -91,31 +91,28 @@
    if(m_light_wallet)
    {
      if (use_fork_rules(HF_VERSION_PER_BYTE_FEE))
-@@ -6969,22 +6613,12 @@
- //------------------------------------------------------------------------------------------------------------------------------
- uint64_t wallet2::get_min_ring_size() const
+@@ -6971,18 +6613,14 @@
  {
--  if (use_fork_rules(8, 10))
--    return 11;
+   if (use_fork_rules(8, 10))
+     return 11;
 -  if (use_fork_rules(7, 10))
 -    return 7;
 -  if (use_fork_rules(6, 10))
 -    return 5;
 -  if (use_fork_rules(2, 10))
 -    return 3;
--  return 0;
++  if (use_fork_rules(5, 10))
 +    return 10;
+   return 0;
  }
  //------------------------------------------------------------------------------------------------------------------------------
  uint64_t wallet2::get_max_ring_size() const
  {
 -  if (use_fork_rules(8, 10))
--    return 11;
--  return 0;
-+  return 99;
++  if (use_fork_rules(5, 10))
+     return 11;
+   return 0;
  }
- //------------------------------------------------------------------------------------------------------------------------------
- uint64_t wallet2::adjust_mixin(uint64_t mixin) const
 @@ -10108,7 +10108,7 @@
    if (m_upper_transaction_weight_limit > 0)
      return m_upper_transaction_weight_limit;
