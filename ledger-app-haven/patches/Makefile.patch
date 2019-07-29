@@ -1,0 +1,20 @@
+--- a/Makefile
++++ b/Makefile
+@@ -15,7 +15,7 @@
+ #  limitations under the License.
+ #*******************************************************************************
+ 
+-TARGET_NAME := TARGET_NANOX
++TARGET_NAME := TARGET_NANOS
+ 
+ -include Makefile.env
+ ifeq ($(BOLOS_SDK),)
+@@ -25,7 +25,7 @@ include $(BOLOS_SDK)/Makefile.defines
+ 
+ #Monero /44'/128'
+ APP_LOAD_PARAMS=  --path "2147483692/2147483776" --curve secp256k1 $(COMMON_LOAD_PARAMS) --appFlags 0x240
+-APPNAME = "Monero"
++APPNAME = "Haven"
+ 
+ ifeq ($(TARGET_NAME),TARGET_BLUE)
+ ICONNAME = images/icon_monero_blue.gif
