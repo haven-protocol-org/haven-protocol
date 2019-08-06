@@ -1,0 +1,10 @@
+--- a/src/rpc/core_rpc_server_commands_defs.h
++++ b/src/rpc/core_rpc_server_commands_defs.h
+@@ -1014,6 +1014,7 @@ namespace cryptonote
+       uint64_t timestamp;
+       std::string prev_hash;
+       uint32_t nonce;
++      offshore::pricing_record pricing_record;
+       bool orphan_status;
+       uint64_t height;
+       uint64_t depth;
