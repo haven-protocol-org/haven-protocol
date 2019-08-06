@@ -35,10 +35,11 @@
          return;
        }
        // Note that there was a schema change within version 0 as well.
-@@ -5227,5 +5230,6 @@ void BlockchainLMDB::migrate_4_5()
+@@ -5227,6 +5230,7 @@ void BlockchainLMDB::migrate_4_5()
        bi.bi_hash = bi_old->bi_hash;
        bi.bi_cum_rct = bi_old->bi_cum_rct;
        bi.bi_long_term_block_weight = bi_old->bi_long_term_block_weight;
 +      memset(&bi.bi_pricing_record, 0, sizeof(offshore::pricing_record));
  
        MDB_val_set(nv, bi);
+       result = mdb_cursor_put(c_cur, (MDB_val *)&zerokval, &nv, MDB_APPENDDUP);
