@@ -21,8 +21,9 @@ git pull -t
 popd > /dev/null 2>&1
 
 # Apply patches / whole files to the monero codebase
+pushd patches > /dev/null 2>&1
 echo "Applying patches to Monero codebase:"
-find src -type f | while read line ; do
+find * -type f | while read line ; do
     echo -n -e "\t"
     if [[ $line =~ ".git/" ]]; then
         continue
@@ -32,19 +33,20 @@ find src -type f | while read line ; do
     if [[ ${line: -6} == ".patch" ]]; then
         patchfile=$line
         filename=${patchfile//\.patch/}
-        dstfilename="monero/$filename"
+        dstfilename="$PWD/../monero/$filename"
         #echo "Applying patch file $patchfile for target $dstfilename ...";
         patch -p0 $dstfilename < $patchfile
     else
-        dstfilename="monero/$line"
+        dstfilename="../monero/$line"
 	foldername=${line%/*}
         echo "Copying file $line to $dstfilename ...";
-	if [[ ! -d "monero/$foldername" ]]; then
-	    mkdir -p "monero/$foldername"
+	if [[ ! -d "../monero/$foldername" ]]; then
+	    mkdir -p "../monero/$foldername"
 	fi
         cp $line $dstfilename
     fi
 done
+popd > /dev/null 2>&1
 
 # Write out the Haven version information
 HAVENVER=`git rev-parse --short HEAD`
