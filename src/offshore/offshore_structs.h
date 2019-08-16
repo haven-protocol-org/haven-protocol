@@ -26,29 +26,30 @@
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
+#include <cstdint>
 #include "common/pod-class.h"
 
 namespace offshore {
 
 #pragma pack(push, 1)
   POD_CLASS pricing_record {
-    double xAG;
-    double xAU;
-    double xAUD;
-    double xBTC;
-    double xCAN;
-    double xCHF;
-    double xCNY;
-    double xEUR;
-    double xGBP;
-    double xJPY;
-    double xNOK;
-    double xNZD;
-    double xUSD;
-    double unused1;
-    double unused2;
-    double unused3;
-    char signature[32];
+    uint64_t xAG;
+    uint64_t xAU;
+    uint64_t xAUD;
+    uint64_t xBTC;
+    uint64_t xCAN;
+    uint64_t xCHF;
+    uint64_t xCNY;
+    uint64_t xEUR;
+    uint64_t xGBP;
+    uint64_t xJPY;
+    uint64_t xNOK;
+    uint64_t xNZD;
+    uint64_t xUSD;
+    uint64_t unused1;
+    uint64_t unused2;
+    uint64_t unused3;
+    char signature[64];
   };
 #pragma pack(pop)
 }
