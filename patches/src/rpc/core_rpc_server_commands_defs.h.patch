@@ -1,6 +1,35 @@
---- a/src/rpc/core_rpc_server_commands_defs.h
-+++ b/src/rpc/core_rpc_server_commands_defs.h
-@@ -1014,6 +1014,7 @@ namespace cryptonote
+--- monero/src/rpc/core_rpc_server_commands_defs.h	2019-09-02 10:05:52.561716265 +0100
++++ monero-offshore/src/rpc/core_rpc_server_commands_defs.h	2019-08-13 15:14:22.947932633 +0100
+@@ -864,6 +864,28 @@
+   };
+ 
+   //-----------------------------------------------
++  struct COMMAND_RPC_GET_PRICING_RECORD
++  {
++    struct request_t
++    {
++      BEGIN_KV_SERIALIZE_MAP()
++      END_KV_SERIALIZE_MAP()
++    };
++    typedef epee::misc_utils::struct_init<request_t> request;
++    
++
++    struct response_t
++    {
++      offshore::pricing_record pr;
++      
++      BEGIN_KV_SERIALIZE_MAP()
++      KV_SERIALIZE(pr)
++      END_KV_SERIALIZE_MAP()
++    };
++    typedef epee::misc_utils::struct_init<response_t> response;
++  };
++
++  //-----------------------------------------------
+   struct COMMAND_RPC_SAVE_BC
+   {
+     struct request_t
+@@ -1014,6 +1036,7 @@
        uint64_t timestamp;
        std::string prev_hash;
        uint32_t nonce;
@@ -8,3 +37,11 @@
        bool orphan_status;
        uint64_t height;
        uint64_t depth;
+@@ -1038,6 +1061,7 @@
+         KV_SERIALIZE(timestamp)
+         KV_SERIALIZE(prev_hash)
+         KV_SERIALIZE(nonce)
++        KV_SERIALIZE(pricing_record)
+         KV_SERIALIZE(orphan_status)
+         KV_SERIALIZE(height)
+         KV_SERIALIZE(depth)

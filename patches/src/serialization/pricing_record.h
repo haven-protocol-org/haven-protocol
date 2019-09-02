@@ -34,7 +34,7 @@
 
 #include "serialization.h"
 #include "debug_archive.h"
-#include "offshore/offshore_structs.h"
+#include "offshore/pricing_record.h"
 
 /*
 // read

@@ -1,0 +1,48 @@
+diff -rwu monero/src/blockchain_db/blockchain_db.cpp monero-offshore/src/blockchain_db/blockchain_db.cpp
+--- monero/src/blockchain_db/blockchain_db.cpp	2019-09-02 09:29:13.283820786 +0100
++++ monero-offshore/src/blockchain_db/blockchain_db.cpp	2019-08-19 13:17:32.669043183 +0100
+@@ -151,6 +151,14 @@
+     {
+       add_spent_key(boost::get<txin_to_key>(tx_input).k_image);
+     }
++    else if (tx_input.type() == typeid(txin_onshore))
++    {
++      add_spent_key(boost::get<txin_onshore>(tx_input).k_image);
++    }
++    else if (tx_input.type() == typeid(txin_offshore))
++    {
++      add_spent_key(boost::get<txin_offshore>(tx_input).k_image);
++    }
+     else if (tx_input.type() == typeid(txin_gen))
+     {
+       /* nothing to do here */
+@@ -165,6 +173,14 @@
+         {
+           remove_spent_key(boost::get<txin_to_key>(tx_input).k_image);
+         }
++        else if (tx_input.type() == typeid(txin_onshore))
++	{
++	  remove_spent_key(boost::get<txin_onshore>(tx_input).k_image);
++	}
++	else if (tx_input.type() == typeid(txin_offshore))
++	{
++	  remove_spent_key(boost::get<txin_offshore>(tx_input).k_image);
++	}
+       }
+       return;
+     }
+@@ -292,6 +308,14 @@
+     {
+       remove_spent_key(boost::get<txin_to_key>(tx_input).k_image);
+     }
++    else if (tx_input.type() == typeid(txin_onshore))
++    {
++      remove_spent_key(boost::get<txin_onshore>(tx_input).k_image);
++    }
++    else if (tx_input.type() == typeid(txin_offshore))
++    {
++      remove_spent_key(boost::get<txin_offshore>(tx_input).k_image);
++    }
+   }
+ 
+   // need tx as tx.vout has the tx outputs, and the output amounts are needed

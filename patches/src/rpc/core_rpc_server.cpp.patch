@@ -1,0 +1,11 @@
+--- monero/src/rpc/core_rpc_server.cpp	2019-09-02 09:29:13.359821798 +0100
++++ monero-offshore/src/rpc/core_rpc_server.cpp	2019-08-21 17:21:56.960541708 +0100
+@@ -1428,6 +1428,8 @@
+     response.timestamp = blk.timestamp;
+     response.prev_hash = string_tools::pod_to_hex(blk.prev_id);
+     response.nonce = blk.nonce;
++    if (blk.major_version >= HF_VERSION_OFFSHORE_PRICING)
++      response.pricing_record = blk.pricing_record;
+     response.orphan_status = orphan_status;
+     response.height = height;
+     response.depth = m_core.get_current_blockchain_height() - height - 1;

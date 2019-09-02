@@ -1,0 +1,77 @@
+--- monero/src/cryptonote_basic/cryptonote_boost_serialization.h	2019-09-02 09:29:13.323821318 +0100
++++ monero-offshore/src/cryptonote_basic/cryptonote_boost_serialization.h	2019-08-19 12:45:43.031441931 +0100
+@@ -105,6 +105,12 @@
+   }
+ 
+   template <class Archive>
++  inline void serialize(Archive &a, cryptonote::txout_offshore &x, const boost::serialization::version_type ver)
++  {
++    a & x.key;
++  }
++    
++  template <class Archive>
+   inline void serialize(Archive &a, cryptonote::txout_to_scripthash &x, const boost::serialization::version_type ver)
+   {
+     a & x.hash;
+@@ -142,6 +148,22 @@
+   }
+ 
+   template <class Archive>
++  inline void serialize(Archive &a, cryptonote::txin_offshore &x, const boost::serialization::version_type ver)
++  {
++    a & x.amount;
++    a & x.key_offsets;
++    a & x.k_image;
++  }
++
++  template <class Archive>
++  inline void serialize(Archive &a, cryptonote::txin_onshore &x, const boost::serialization::version_type ver)
++  {
++    a & x.amount;
++    a & x.key_offsets;
++    a & x.k_image;
++  }
++
++  template <class Archive>
+   inline void serialize(Archive &a, cryptonote::tx_out &x, const boost::serialization::version_type ver)
+   {
+     a & x.amount;
+@@ -187,6 +209,9 @@
+     a & b.timestamp;
+     a & b.prev_id;
+     a & b.nonce;
++    if (b.major_version >= HF_VERSION_OFFSHORE_PRICING) {
++      a & b.pricing_record;
++    }
+     //------------------
+     a & b.miner_tx;
+     a & b.tx_hashes;
+@@ -375,6 +400,28 @@
+     }
+   }
+ 
++  template <class Archive>
++  inline void serialize(Archive &a, offshore::pricing_record &x, const boost::serialization::version_type ver)
++  {
++    a & x.xAG;
++    a & x.xAU;
++    a & x.xAUD;
++    a & x.xBTC;
++    a & x.xCAD;
++    a & x.xCHF;
++    a & x.xCNY;
++    a & x.xEUR;
++    a & x.xGBP;
++    a & x.xJPY;
++    a & x.xNOK;
++    a & x.xNZD;
++    a & x.xUSD;
++    a & x.unused1;
++    a & x.unused2;
++    a & x.unused3;
++    a & x.signature;
++  }
++
+ }
+ }
+ 

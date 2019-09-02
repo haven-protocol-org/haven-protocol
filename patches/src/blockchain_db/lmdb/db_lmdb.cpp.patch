@@ -1,14 +1,14 @@
---- monero/src/blockchain_db/lmdb/db_lmdb.cpp	2019-06-20 21:03:18.670817098 +0100
-+++ haven/src/blockchain_db/lmdb/db_lmdb.cpp	2019-05-30 17:58:17.097592512 +0100
+--- monero/src/blockchain_db/lmdb/db_lmdb.cpp	2019-09-02 09:29:50.292313410 +0100
++++ monero-offshore/src/blockchain_db/lmdb/db_lmdb.cpp	2019-08-19 12:58:25.860744857 +0100
 @@ -41,6 +41,7 @@
  #include "crypto/crypto.h"
  #include "profile_tools.h"
  #include "ringct/rctOps.h"
-+#include "offshore/offshore_structs.h"
++#include "offshore/pricing_record.h"
  
  #undef MONERO_DEFAULT_LOG_CATEGORY
  #define MONERO_DEFAULT_LOG_CATEGORY "blockchain.db.lmdb"
-@@ -312,6 +313,7 @@ typedef struct mdb_block_info_4
+@@ -312,6 +313,7 @@
    crypto::hash bi_hash;
    uint64_t bi_cum_rct;
    uint64_t bi_long_term_block_weight;
@@ -21,11 +21,31 @@
    bi.bi_hash = blk_hash;
    bi.bi_cum_rct = num_rct_outs;
 -  if (blk.major_version >= 4)
-+  memset(&bi.bi_pricing_record, 0, sizeof(offshore::pricing_record));
++  bi.bi_pricing_record = blk.pricing_record;
 +  if (m_height > 0)
    {
      uint64_t last_height = m_height-1;
      MDB_val_set(h, last_height);
+@@ -1018,8 +1021,8 @@
+   CURSOR(output_txs)
+   CURSOR(output_amounts)
+ 
+-  if (tx_output.target.type() != typeid(txout_to_key))
+-    throw0(DB_ERROR("Wrong output type: expected txout_to_key"));
++  if (tx_output.target.type() != typeid(txout_to_key) && tx_output.target.type() != typeid(txout_offshore))
++    throw0(DB_ERROR("Wrong output type: expected txout_to_key or txout_offshore"));
+   if (tx_output.amount == 0 && !commitment)
+     throw0(DB_ERROR("RCT output without commitment"));
+ 
+@@ -1047,7 +1050,7 @@
+   else
+     ok.amount_index = 0;
+   ok.output_id = m_num_outputs;
+-  ok.data.pubkey = boost::get < txout_to_key > (tx_output.target).key;
++  ok.data.pubkey = tx_output.target.type() == typeid(txout_to_key) ? boost::get < txout_to_key > (tx_output.target).key : boost::get < txout_offshore > (tx_output.target).key;
+   ok.data.unlock_time = unlock_time;
+   ok.data.height = m_height;
+   if (tx_output.amount == 0)
 @@ -1461,7 +1464,7 @@
          mdb_env_close(m_env);
          m_open = false;
@@ -35,11 +55,11 @@
          return;
        }
        // Note that there was a schema change within version 0 as well.
-@@ -5227,6 +5230,7 @@ void BlockchainLMDB::migrate_4_5()
+@@ -5227,6 +5230,7 @@
        bi.bi_hash = bi_old->bi_hash;
        bi.bi_cum_rct = bi_old->bi_cum_rct;
        bi.bi_long_term_block_weight = bi_old->bi_long_term_block_weight;
-+      memset(&bi.bi_pricing_record, 0, sizeof(offshore::pricing_record));
++      bi.bi_pricing_record = offshore::pricing_record();
  
        MDB_val_set(nv, bi);
        result = mdb_cursor_put(c_cur, (MDB_val *)&zerokval, &nv, MDB_APPENDDUP);

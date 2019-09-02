@@ -24,55 +24,71 @@
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// Portions of this code based upon code Copyright (c) 2019, The Monero Project
 
 #pragma once
-#include "pricing_record.h"
-#include "cryptonote_basic/cryptonote_basic.h"
 
-namespace offshore {
+#include <cstdint>
 
-  class PricingHandler {
+namespace epee
+{
+  namespace serialization
+  {
+    class portable_storage;
+    struct section;
+  }
+}
+
+namespace offshore
+{
+  class pricing_record
+  {
 
   public:
 
-    /**
-     * @brief Constructor
-     */
-    PricingHandler();
+    // Fields 
+    uint64_t xAG;
+    uint64_t xAU;
+    uint64_t xAUD;
+    uint64_t xBTC;
+    uint64_t xCAD;
+    uint64_t xCHF;
+    uint64_t xCNY;
+    uint64_t xEUR;
+    uint64_t xGBP;
+    uint64_t xJPY;
+    uint64_t xNOK;
+    uint64_t xNZD;
+    uint64_t xUSD;
+    uint64_t unused1;
+    uint64_t unused2;
+    uint64_t unused3;
+    char signature[64];
 
-    /**
-     * @brief Destructor
-     */
-    ~PricingHandler();
-
-    /**
-     * @brief Shutdown the pricing record system (stop the worker thread, etc)
-     *
-     * @return true on success, false if any shutdown steps fail
-     */
-    bool deinit();
+    // Default c'tor
+    pricing_record() noexcept;
     
-    /**
-     * @brief Initialize the pricing record system (start the worker thread, etc)
-     *
-     * @return true on success, false if any initialization steps fail
-     */
-    bool init();
-
-    /**
-     * @brief Store the current pricing record into the passed-in block
-     *
-     * @param b the block to update
-     *
-     * @return true on success, false if any steps fail
-     */
-    bool store_pricing_record_into_block(cryptonote::block& b);
-
-  private:
-
-    /**
-     * @brief Var to hold the latest pricing record, however that may be obtained
-     */
-    pricing_record m_current_record;
+    //! Load from epee p2p format
+    bool _load(epee::serialization::portable_storage& src, epee::serialization::section* hparent);
+    
+    //! Store in epee p2p format
+    bool store(epee::serialization::portable_storage& dest, epee::serialization::section* hparent) const;
+    pricing_record(const pricing_record& orig) noexcept;
+    ~pricing_record() = default;
+    pricing_record& operator=(const pricing_record& orig) noexcept;
+    
+    bool equal(const pricing_record& other) const noexcept;
   };
-}
+
+  inline bool operator==(const pricing_record& a, const pricing_record& b) noexcept
+  {
+   return a.equal(b);
+  }
+  
+  inline bool operator!=(const pricing_record& a, const pricing_record& b) noexcept
+  {
+   return !a.equal(b);
+  }
+
+} // offshore

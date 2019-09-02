@@ -1,7 +1,34 @@
-diff --git a/src/cryptonote_basic/cryptonote_format_utils.cpp b/src/cryptonote_basic/cryptonote_format_utils.cpp
-index 7d7de416..2f94d47c 100644
 --- a/src/cryptonote_basic/cryptonote_format_utils.cpp
 +++ b/src/cryptonote_basic/cryptonote_format_utils.cpp
+@@ -135,12 +135,14 @@
+       }
+       for (size_t n = 0; n < tx.rct_signatures.outPk.size(); ++n)
+       {
+-        if (tx.vout[n].target.type() != typeid(txout_to_key))
+-        {
++        if (tx.vout[n].target.type() == typeid(txout_to_key)) {
++	  rv.outPk[n].dest = rct::pk2rct(boost::get<txout_to_key>(tx.vout[n].target).key);
++	} else if (tx.vout[n].target.type() == typeid(txout_offshore)) {
++	  rv.outPk[n].dest = rct::pk2rct(boost::get<txout_offshore>(tx.vout[n].target).key);
++	} else {
+           LOG_PRINT_L1("Unsupported output type in tx " << get_transaction_hash(tx));
+           return false;
+         }
+-        rv.outPk[n].dest = rct::pk2rct(boost::get<txout_to_key>(tx.vout[n].target).key);
+       }
+ 
+       if (!base_only)
+@@ -435,8 +437,8 @@
+     uint64_t amount_out = 0;
+     for(auto& in: tx.vin)
+     {
+-      CHECK_AND_ASSERT_MES(in.type() == typeid(txin_to_key), 0, "unexpected type id in transaction");
+-      amount_in += boost::get<txin_to_key>(in).amount;
++      CHECK_AND_ASSERT_MES(in.type() == typeid(txin_to_key) || in.type() == typeid(txin_offshore) || in.type() == typeid(txin_onshore), 0, "unexpected type id in transaction");
++      amount_in += in.type() == typeid(txin_to_key) ? boost::get<txin_to_key>(in).amount : in.type() == typeid(txin_onshore) ? boost::get<txin_onshore>(in).amount : boost::get<txin_offshore>(in).amount;
+     }
+     for(auto& o: tx.vout)
+       amount_out += o.amount;
 @@ -519,7 +519,7 @@ namespace cryptonote
        bool r = ::do_serialize(ar, field);
        if (!r)
@@ -61,6 +88,73 @@ index 7d7de416..2f94d47c 100644
    bool remove_field_from_tx_extra(std::vector<uint8_t>& tx_extra, const std::type_info &type)
    {
      if (tx_extra.empty())
+@@ -746,10 +768,9 @@
+   {
+     for(const auto& in: tx.vin)
+     {
+-      CHECK_AND_ASSERT_MES(in.type() == typeid(txin_to_key), false, "wrong variant type: "
+-        << in.type().name() << ", expected " << typeid(txin_to_key).name()
++      CHECK_AND_ASSERT_MES(in.type() == typeid(txin_to_key) || in.type() == typeid(txin_offshore) || in.type() == typeid(txin_onshore), false, "wrong variant type: "
++			   << in.type().name() << ", expected " << typeid(txin_to_key).name() << "or " << typeid(txin_onshore).name()
+         << ", in transaction id=" << get_transaction_hash(tx));
+-
+     }
+     return true;
+   }
+@@ -758,8 +779,9 @@
+   {
+     for(const tx_out& out: tx.vout)
+     {
+-      CHECK_AND_ASSERT_MES(out.target.type() == typeid(txout_to_key), false, "wrong variant type: "
++      CHECK_AND_ASSERT_MES(out.target.type() == typeid(txout_to_key) || out.target.type() == typeid(txout_offshore), false, "wrong variant type: "
+         << out.target.type().name() << ", expected " << typeid(txout_to_key).name()
++			   << "or " << typeid(txout_offshore).name()
+         << ", in transaction id=" << get_transaction_hash(tx));
+ 
+       if (tx.version == 1)
+@@ -767,7 +789,7 @@
+         CHECK_AND_NO_ASSERT_MES(0 < out.amount, false, "zero amount output in transaction id=" << get_transaction_hash(tx));
+       }
+ 
+-      if(!check_key(boost::get<txout_to_key>(out.target).key))
++      if(!check_key(out.target.type() == typeid(txout_to_key) ? boost::get<txout_to_key>(out.target).key : boost::get<txout_offshore>(out.target).key))
+         return false;
+     }
+     return true;
+@@ -781,6 +803,25 @@
+   bool check_inputs_overflow(const transaction& tx)
+   {
+     uint64_t money = 0;
++    if (tx.vin[0].type() == typeid(txin_offshore)) {
++      for(const auto& in: tx.vin)
++	{
++	  CHECKED_GET_SPECIFIC_VARIANT(in, const txin_offshore, tokey_in, false);
++	  if(money > tokey_in.amount + money)
++	    return false;
++	  money += tokey_in.amount;
++	}
++    }
++    else if (tx.vin[0].type() == typeid(txin_onshore)) {
++      for(const auto& in: tx.vin)
++	{
++	  CHECKED_GET_SPECIFIC_VARIANT(in, const txin_onshore, tokey_in, false);
++	  if(money > tokey_in.amount + money)
++	    return false;
++	  money += tokey_in.amount;
++	}
++    }
++    else {
+     for(const auto& in: tx.vin)
+     {
+       CHECKED_GET_SPECIFIC_VARIANT(in, const txin_to_key, tokey_in, false);
+@@ -788,6 +829,7 @@
+         return false;
+       money += tokey_in.amount;
+     }
++    }
+     return true;
+   }
+   //---------------------------------------------------------------
 @@ -928,15 +948,15 @@ namespace cryptonote
      switch (decimal_point)
      {
@@ -82,6 +176,27 @@ index 7d7de416..2f94d47c 100644
        default:
          ASSERT_MES_AND_THROW("Invalid decimal point specification: " << decimal_point);
      }
+@@ -946,6 +988,20 @@
+   {
+     if (decimal_point == (unsigned int)-1)
+       decimal_point = default_decimal_point;
++    std::string s = std::to_string(amount);
++    if(s.size() < decimal_point+1)
++    {
++      s.insert(0, decimal_point+1 - s.size(), '0');
++    }
++    if (decimal_point > 0)
++      s.insert(s.size() - decimal_point, ".");
++    return s;
++  }
++  //---------------------------------------------------------------
++  std::string print_offshore_money(uint64_t amount, unsigned int decimal_point)
++  {
++    if (decimal_point == (unsigned int)-1)
++      decimal_point = default_decimal_point;
+     std::string s = std::to_string(amount);
+     if(s.size() < decimal_point+1)
+     {
 @@ -1220,16 +1240,23 @@ namespace cryptonote
    //---------------------------------------------------------------
    bool get_block_longhash(const block& b, crypto::hash& res, uint64_t height)

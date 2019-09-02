@@ -13,3 +13,11 @@ index c9de2a56..5b0a2030 100644
    bool remove_field_from_tx_extra(std::vector<uint8_t>& tx_extra, const std::type_info &type);
    void set_payment_id_to_tx_extra_nonce(blobdata& extra_nonce, const crypto::hash& payment_id);
    void set_encrypted_payment_id_to_tx_extra_nonce(blobdata& extra_nonce, const crypto::hash8& payment_id);
+@@ -140,6 +140,7 @@
+   unsigned int get_default_decimal_point();
+   std::string get_unit(unsigned int decimal_point = -1);
+   std::string print_money(uint64_t amount, unsigned int decimal_point = -1);
++  std::string print_offshore_money(uint64_t amount, unsigned int decimal_point = -1);
+   //---------------------------------------------------------------
+   template<class t_object>
+   bool t_serializable_object_from_blob(t_object& to, const blobdata& b_blob)

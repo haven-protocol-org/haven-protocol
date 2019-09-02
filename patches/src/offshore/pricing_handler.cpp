@@ -31,7 +31,7 @@
 namespace offshore {
 
   PricingHandler::PricingHandler()
-    : m_current_record{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, "\0"}
+    : m_current_record()
   {
   }
 
@@ -49,7 +49,7 @@ namespace offshore {
   }
   
   bool PricingHandler::store_pricing_record_into_block(cryptonote::block& b) {
-    memcpy(&b.pricing_record, &m_current_record, sizeof(offshore::pricing_record));
+    b.pricing_record = m_current_record;
     return true;
   }
 

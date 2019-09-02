@@ -9,12 +9,15 @@
  #define TX_EXTRA_NONCE_PAYMENT_ID           0x00
  #define TX_EXTRA_NONCE_ENCRYPTED_PAYMENT_ID 0x01
  
-@@ -179,11 +181,20 @@ namespace cryptonote
+@@ -179,11 +181,23 @@ namespace cryptonote
      END_SERIALIZE()
    };
  
 +  struct tx_extra_offshore
 +  {
++    // First char = source asset type
++    // Second char = dest asset type
++    // ...
 +    std::string data;
 +
 +    BEGIN_SERIALIZE()
