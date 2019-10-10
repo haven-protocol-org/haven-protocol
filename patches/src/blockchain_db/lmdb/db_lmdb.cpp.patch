@@ -21,7 +21,7 @@
    bi.bi_hash = blk_hash;
    bi.bi_cum_rct = num_rct_outs;
 -  if (blk.major_version >= 4)
-+  bi.bi_pricing_record = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"\0"};
++  memset(&bi.bi_pricing_record, 0, sizeof(offshore::pricing_record));
 +  if (m_height > 0)
    {
      uint64_t last_height = m_height-1;
@@ -39,6 +39,6 @@
        bi.bi_hash = bi_old->bi_hash;
        bi.bi_cum_rct = bi_old->bi_cum_rct;
        bi.bi_long_term_block_weight = bi_old->bi_long_term_block_weight;
-+      bi.bi_pricing_record = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"\0"};
++      memset(&bi.bi_pricing_record, 0, sizeof(offshore::pricing_record));
  
        MDB_val_set(nv, bi);

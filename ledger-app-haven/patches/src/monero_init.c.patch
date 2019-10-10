@@ -1,0 +1,24 @@
+--- a/src/monero_init.c
++++ b/src/monero_init.c
+@@ -24,7 +24,7 @@
+ /* -- A Kind of Magic -- */
+ /* ----------------------*/
+ const unsigned char C_MAGIC[8] = {
+- 'M','O','N','E','R','O','H','W'
++ 'H','A','V','E','N','-','H','W'
+ };
+ 
+ /* ----------------------------------------------------------------------- */
+@@ -176,6 +176,7 @@ void monero_install(unsigned char netId) {
+ /* ----------------------------------------------------------------------- */
+ /* --- Reset                                                           --- */
+ /* ----------------------------------------------------------------------- */
++/*
+ #define MONERO_SUPPORTED_CLIENT_SIZE 1
+ const char * const monero_supported_client[MONERO_SUPPORTED_CLIENT_SIZE] = {
+   "0.14.1.0",
+@@ -210,3 +211,4 @@ int monero_apdu_reset() {
+   monero_io_insert_u8(MONERO_VERSION_MICRO);
+   return 0x9000;
+ }
++*/
