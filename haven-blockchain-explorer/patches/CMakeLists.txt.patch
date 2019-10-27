@@ -1,0 +1,8 @@
+@@ -117,6 +117,7 @@ set(LIBRARIES
+         multisig
+         daemonizer
+         cncrypto
++        offshore
+         blocks
+         lmdb
+         ringct
