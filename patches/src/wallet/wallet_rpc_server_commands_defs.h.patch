@@ -1,12 +1,44 @@
---- monero/src/wallet/wallet_rpc_server_commands_defs.h	2019-06-20 21:03:18.814815909 +0100
-+++ haven/src/wallet/wallet_rpc_server_commands_defs.h	2019-06-17 17:10:44.733734379 +0100
+--- monero/src/wallet/wallet_rpc_server_commands_defs.h        2019-06-20 21:03:18.814815909 +0100
++++ haven/src/wallet/wallet_rpc_server_commands_defs.h 2019-06-17 17:10:44.733734379 +0100
+@@ -450,6 +450,7 @@ namespace wallet_rpc
+       uint32_t account_index;
+       std::set<uint32_t> subaddr_indices;
+       uint32_t priority;
++      uint64_t mixin;
+       uint64_t ring_size;
+       uint64_t unlock_time;
+       std::string payment_id;
+@@ -463,6 +464,7 @@ namespace wallet_rpc
+         KV_SERIALIZE(account_index)
+         KV_SERIALIZE(subaddr_indices)
+         KV_SERIALIZE(priority)
++        KV_SERIALIZE_OPT(mixin, (uint64_t)0)
+         KV_SERIALIZE_OPT(ring_size, (uint64_t)0)
+         KV_SERIALIZE(unlock_time)
+         KV_SERIALIZE(payment_id)
+@@ -507,6 +509,7 @@ namespace wallet_rpc
+       uint32_t account_index;
+       std::set<uint32_t> subaddr_indices;
+       uint32_t priority;
++      uint64_t mixin;
+       uint64_t ring_size;
+       uint64_t unlock_time;
+       std::string payment_id;
+@@ -520,6 +523,7 @@ namespace wallet_rpc
+         KV_SERIALIZE(account_index)
+         KV_SERIALIZE(subaddr_indices)
+         KV_SERIALIZE(priority)
++        KV_SERIALIZE_OPT(mixin, (uint64_t)0)
+         KV_SERIALIZE_OPT(ring_size, (uint64_t)0)
+         KV_SERIALIZE(unlock_time)
+         KV_SERIALIZE(payment_id)
 @@ -2122,6 +2130,7 @@
        std::string spendkey;
        std::string viewkey;
        std::string password;
 +      std::string language;
        bool autosave_current;
- 
+
        BEGIN_KV_SERIALIZE_MAP()
 @@ -2131,6 +2140,7 @@
        KV_SERIALIZE(spendkey)
