@@ -17,6 +17,7 @@ popd > /dev/null 2>&1
 # Apply patches / whole files to the monero codebase
 echo "Applying patches to Onion Monero codebase:"
 pushd patches > /dev/null 2>&1
+echo "current folder is $PWD"
 find * -type f | while read line ; do
     echo -n -e "\t"
     if [[ $line =~ ".git/" ]]; then
@@ -27,11 +28,11 @@ find * -type f | while read line ; do
     if [[ ${line: -6} == ".patch" ]]; then
         patchfile=$line
         filename=${patchfile//\.patch/}
-        dstfilename="../onion-monero-blockchain-explorer/$filename"
+        dstfilename="`dirname $PWD`/onion-monero-blockchain-explorer/$filename"
         #echo "Applying patch file $patchfile for target $dstfilename";
         patch -p0 $dstfilename < $patchfile
     else
-        dstfilename="../onion-monero-blockchain-explorer/$line"
+        dstfilename="`dirname $PWD`/onion-monero-blockchain-explorer/$line"
         echo "Copying file $line to $dstfilename";
         cp $line $dstfilename
     fi
