@@ -1,5 +1,23 @@
 --- monero/src/wallet/wallet_rpc_server.cpp	2019-06-20 21:03:18.814815909 +0100
 +++ haven/src/wallet/wallet_rpc_server.cpp	2019-06-17 17:10:44.705734682 +0100
+@@ -937,7 +937,7 @@ namespace tools
+
+     try
+     {
+-      uint64_t mixin = m_wallet->adjust_mixin(req.ring_size ? req.ring_size - 1 : 0);
++      uint64_t mixin = m_wallet->adjust_mixin(req.ring_size ? req.ring_size - 1 : (req.mixin ? req.mixin : 0));
+       uint32_t priority = m_wallet->adjust_priority(req.priority);
+       std::vector<wallet2::pending_tx> ptx_vector = m_wallet->create_transactions_2(dsts, mixin, req.unlock_time, priority, extra, req.account_index, req.subaddr_indices);
+
+@@ -989,7 +989,7 @@ namespace tools
+
+     try
+     {
+-      uint64_t mixin = m_wallet->adjust_mixin(req.ring_size ? req.ring_size - 1 : 0);
++      uint64_t mixin = m_wallet->adjust_mixin(req.ring_size ? req.ring_size - 1 : (req.mixin ? req.mixin : 0));
+       uint32_t priority = m_wallet->adjust_priority(req.priority);
+       LOG_PRINT_L2("on_transfer_split calling create_transactions_2");
+       std::vector<wallet2::pending_tx> ptx_vector = m_wallet->create_transactions_2(dsts, mixin, req.unlock_time, priority, extra, req.account_index, req.subaddr_indices);
 @@ -3378,6 +3378,9 @@
        }
      }

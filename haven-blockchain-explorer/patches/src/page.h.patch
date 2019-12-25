@@ -37,15 +37,6 @@
      }
  
      if (viewkey_str.empty())
-@@ -3949,7 +3949,7 @@ show_checkrawkeyimgs(string raw_data, string viewkey_str)
-     const size_t header_lenght = 2 * sizeof(crypto::public_key);
-     const size_t key_img_size  = sizeof(crypto::key_image);
-     const size_t record_lenght = key_img_size + sizeof(crypto::signature);
--    const size_t chacha_length = sizeof(crypto::chacha_key);
-+    const size_t chacha_length = sizeof(crypto::chacha8_key);
- 
-     if (decoded_raw_data.size() < header_lenght)
-     {
 @@ -5496,7 +5496,7 @@ json_outputs(string tx_hash_str,
      if (address_str.empty())
      {
@@ -91,10 +82,10 @@
          return j_response;
      }
  
-@@ -5955,1 +5957,1 @@ json_emission()
+@@ -5955,6 +5957,55 @@ json_emission()
  }
-
-
+ 
+ 
 +
 +/*
 + * Lets use this json api convention for success and error
@@ -145,6 +136,5 @@
 +
 +
  /*
-  * Lets use this json api convention for success and error
-  * https://labs.omniti.com/labs/jsend
-               
+       * Lets use this json api convention for success and error
+       * https://labs.omniti.com/labs/jsend
