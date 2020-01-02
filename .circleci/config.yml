@@ -1,3 +1,5 @@
+version: 2.1
+
 tagged-build: &tagged-build
   filters:
     tags:
@@ -5,7 +7,6 @@ tagged-build: &tagged-build
     branches:
       ignore: /.*/
 
-version: 2.1
 jobs:
   build:
     docker:
@@ -37,6 +38,7 @@ jobs:
       PROTOBUF_HASH: '582743bf40c5d3639a70f98f183914a2c0cd0680'
       CFLAGS: '-fPIC'
       CXXFLAGS: '-fPIC'
+      MONERO_BRANCH: 'release-v0.14'
 
     steps:
       - checkout
@@ -169,18 +171,56 @@ jobs:
             make install
             ldconfig
       - run:
+          name: Clone Monero repository
+          command: |
+            git clone -b $MONERO_BRANCH --recursive https://github.com/monero-project/monero
+            pushd monero > /dev/null 2>&1
+            git branch --set-upstream-to=origin/$MONERO_BRANCH $MONERO_BRANCH
+            popd > /dev/null 2>&1
+      - run:
+          name: Apply Haven patches on Monero basecode
+          command: |
+            pushd patches > /dev/null 2>&1
+            find * -type f | while read line ; do
+                echo -n -e "\t"
+                if [[ $line =~ ".git/" ]]; then
+                    continue
+                elif [[ $line =~ "^README.md$" ]]; then
+                    continue
+                fi
+                if [[ ${line: -6} == ".patch" ]]; then
+                    patchfile=$line
+                    filename=${patchfile//\.patch/}
+                    dstfilename="$PWD/../monero/$filename"
+                    #echo "Applying patch file $patchfile for target $dstfilename ...";
+                    patch -p0 $dstfilename < $patchfile
+                else
+                    dstfilename="../monero/$line"
+                foldername=${line%/*}
+                    echo "Copying file $line to $dstfilename ...";
+                if [[ ! -d "../monero/$foldername" ]]; then
+                    mkdir -p "../monero/$foldername"
+                fi
+                    cp $line $dstfilename
+                fi
+            done
+            popd > /dev/null 2>&1
+            
+            HAVENVER=`git rev-parse --short HEAD`
+            sed -i -e "s/@HAVENTAG@/$HAVENVER/g" monero/src/version.cpp.in
+      - run:
           name: Build and Package Haven
           command: |
             export OPENSSL_ROOT_DIR=/usr/local/openssl-${OPENSSL_VERSION}
             export BOOST_ROOT=/usr/local/boost_${BOOST_VERSION}
             export USE_SINGLE_BUILDDIR=1
-            git submodule init && git submodule update
-            rm -rf build
+            pushd monero > /dev/null 2>&1
             make release-static
             tar -czvf haven-linux-x64-$(git describe --tags)-cli.tar.gz build/release/bin
             cp haven-linux-x64-$(git describe --tags)-cli.tar.gz build/release/bin
       - store_artifacts:
          path: build/release/bin/
+
 
 workflows:
   version: 2
