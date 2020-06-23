@@ -1,0 +1,51 @@
+--- ../monero/Dockerfile	2019-10-10 15:59:10.896838307 +0200
++++ ../monero/Dockerfile-haven	2019-10-10 15:54:49.900698148 +0200
+@@ -169,44 +169,10 @@
+ COPY . .
+ 
+ ENV USE_SINGLE_BUILDDIR=1
+-ARG NPROC
++ARG BA1
++ARG BA2
++ARG BA3
+ RUN set -ex && \
+     git submodule init && git submodule update && \
+     rm -rf build && \
+-    if [ -z "$NPROC" ] ; \
+-    then make -j$(nproc) release-static ; \
+-    else make -j$NPROC release-static ; \
+-    fi
+-
+-# runtime stage
+-FROM ubuntu:16.04
+-
+-RUN set -ex && \
+-    apt-get update && \
+-    apt-get --no-install-recommends --yes install ca-certificates && \
+-    apt-get clean && \
+-    rm -rf /var/lib/apt
+-COPY --from=builder /src/build/release/bin /usr/local/bin/
+-
+-# Create monero user
+-RUN adduser --system --group --disabled-password monero && \
+-	mkdir -p /wallet /home/monero/.bitmonero && \
+-	chown -R monero:monero /home/monero/.bitmonero && \
+-	chown -R monero:monero /wallet
+-
+-# Contains the blockchain
+-VOLUME /home/monero/.bitmonero
+-
+-# Generate your wallet via accessing the container and run:
+-# cd /wallet
+-# monero-wallet-cli
+-VOLUME /wallet
+-
+-EXPOSE 18080
+-EXPOSE 18081
+-
+-# switch to user monero
+-USER monero
+-
+-ENTRYPOINT ["monerod", "--p2p-bind-ip=0.0.0.0", "--p2p-bind-port=18080", "--rpc-bind-ip=0.0.0.0", "--rpc-bind-port=18081", "--non-interactive", "--confirm-external-bind"]
+-
++    make $BA1 $BA2 $BA3;
